@@ -390,76 +390,10 @@ class People(BaseHandler):
         }
 
 
-class GetTasks(BaseHandler):
-    def init_method(self):
-        print('init')
-        self.required = {
-            'get': ['condition']
-        }
-        self.inputs = {
-            'get': ['condition']
-        }
-        self.module = 'tasks'
-
-    def before_get(self):
-        print('shoro get')
-        try:
-            self.module = 'tasks'
-            print('inja')
-            if 'condition' in self.params:
-                con = {}
-                self.params['condition'] = json.loads(self.params['condition'])
-                print(type(self.params['condition']))
-                for item in self.params['condition']:
-                    print(item)
-                    if item == 'tags':
-                        con[item] = {'$in': self.params['condition'][item]}
-                    elif item == 'to_date':
-                        con[item] =  datetime.strptime(self.params['condition'][item], "%Y-%m-%d")
-                        print('timmeee')
-                        print(datetime.strptime(self.params['condition'][item], "%Y-%m-%d"))
-
-                    elif item == 'from_date':
-                        con[item] =  datetime.strptime(self.params['condition'][item], "%Y-%m-%d")
-
-                    else:
-                        con[item] = self.params['condition'][item]
-
-                print(con)
-                print(type(con))
-                col_tasks = db()['tasks']
-                result = []
-                print('qable for')
-                for item in col_tasks.find(con):
-                    item['id'] = str(item['_id'])
-                    del item['_id']
-                    if 'create_date' in item:
-                        item['create_date'] = str(item['create_date'])
-                    if 'last_update' in item:
-                        item['last_update'] = str(item['last_update'])
-                    if 'from_date' in item:
-                        item['from_date'] = str(item['from_date'])
-                    if 'to_date' in item:
-                        item['to_date'] = str(item['to_date'])
-                    del item['_id']
-                    result.append(item)
-                    print(item)
-                col_saved_tasks = db()['saved_tasks']
-                col_saved_tasks.insert_one({'query':json.dumps(self.params['condition'])})
-                self.output['data']['list'] = result
-                self.set_output('public_operations', 'successful')
-            else:
-                self.set_output('get_tasks', 'get_tasks_failed_params')
-                return False
-        except:
-            self.set_output('get_tasks', 'get_tasks_failed')
-            self.PrintException()
-
-
 class SaveTaskQuery(BaseHandler):
     def init_method(self):
         self.required = {
-            'post':['name']
+            'post': ['name']
         }
         self.inputs = {
             'post': ['tags', 'amount', 'time', 'from', 'type_date','name']
@@ -469,6 +403,7 @@ class SaveTaskQuery(BaseHandler):
 class Dashboard(BaseHandler):
     def before_get(self):
         try:
+            date_now = datetime.strptime(str(datetime.now())[:10], "%Y-%m-%d")
             queries = {}
             col_saved_tasks = db()['save_task_query']
             for item in col_saved_tasks.find({'user_id': self.user_id}):
@@ -476,7 +411,6 @@ class Dashboard(BaseHandler):
                 if 'tags' in item:
                     query['tags'] = {'$in': item['tags']}
                 if 'time' in item and item['time'] != 'now':
-                    print('not now')
                     if 'type_date' in item:
                         if 'from' in item:
                             if 'amount' in item:
@@ -488,21 +422,20 @@ class Dashboard(BaseHandler):
                                     query[item['type_date']] = {
                                         '$gte': datetime.strptime(item['from'], "%Y/%m/%d") + timedelta(
                                             days=item['amount'])}
-                        else:
+                        elif 'from' not in item:
                             if 'amount' in item and 'time' in item:
-                                    if item['time'] == 'pass':
-                                        query[item['type_date']] = {
-                                            '$lte': datetime.now() - timedelta(
-                                                days=item['amount'])}
-                                    elif item['time'] == 'future':
-                                        query[item['type_date']] = {
-                                            '$gte': datetime.now() + timedelta(
-                                                days=item['amount'])}
+                                if item['time'] == 'pass':
+                                    query[item['type_date']] = {
+                                        '$lte': date_now - timedelta(
+                                            days=item['amount'])}
+                                elif item['time'] == 'future':
+                                    query[item['type_date']] = {
+                                        '$gte': date_now + timedelta(
+                                            days=item['amount'])}
                 elif 'time' in item and item['time'] == 'now':
                     print('now')
-                    date = item['from'] if 'from' in item else 'to_date'
-                    query[date] = datetime.strptime(str(datetime.now())[:10], "%Y-%m-%d")
-                    print(query)
+                    date = item['type_date'] if 'type_date' in item else 'to_date'
+                    query[date] = date_now
                 queries[item['name']] = query
             print(queries)
             results = {}
@@ -510,13 +443,9 @@ class Dashboard(BaseHandler):
             for items in queries:
                 print('---------')
                 print(queries[items])
-                print('---------')
+
                 result_list = []
                 for item in col_tasks.find(queries[items]):
-                    print('=======')
-                    print(items)
-                    print(queries[items])
-                    print('=======')
                     item['id'] = str(item['_id'])
                     del item['_id']
                     if 'create_date' in item:
