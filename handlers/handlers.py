@@ -415,7 +415,6 @@ class GetTasks(BaseHandler):
                     if item == 'tags':
                         con[item] = {'$in': self.params['condition'][item]}
                     elif item == 'to_date':
-
                         con[item] =  datetime.strptime(self.params['condition'][item], "%Y-%m-%d")
                         print('timmeee')
                         print(datetime.strptime(self.params['condition'][item], "%Y-%m-%d"))
@@ -456,45 +455,6 @@ class GetTasks(BaseHandler):
             self.set_output('get_tasks', 'get_tasks_failed')
             self.PrintException()
 
-        # try:
-        #     query = {}
-        #     if 'tags' in self.params:
-        #         query['tags'] = {'$in': self.params['tags']}
-        #     if 'time' in self.params and self.params['time'] != 'now':
-        #         if 'type_date' in self.params:
-        #             if 'from' in self.params:
-        #                 if 'amount' in self.params and 'time' in self.params:
-        #                         if self.params['time'] == 'pass':
-        #                             query[self.params['type_date']] = {
-        #                                 '$lte': datetime.strptime(self.params['from'], "%Y/%m/%d") - timedelta(
-        #                                     days=self.params['amount'])}
-        #                         elif self.params['time'] == 'future':
-        #                             query[self.params['type_date']] = {
-        #                                 '$gte': datetime.strptime(self.params['from'], "%Y/%m/%d") + timedelta(
-        #                                     days=self.params['amount'])}
-        #             else:
-        #                 if 'amount' in self.params and 'time' in self.params:
-        #                         if self.params['time'] == 'pass':
-        #                             query[self.params['type_date']] = {
-        #                                 '$lte': datetime.now() - timedelta(
-        #                                     days=self.params['amount'])}
-        #                         elif self.params['time'] == 'future':
-        #                             query[self.params['type_date']] = {
-        #                                 '$gte': datetime.now() + timedelta(
-        #                                     days=self.params['amount'])}
-        #     elif 'time' in self.params and self.params['time'] == 'now':
-        #         query['type_date'] = datetime.now()
-        #     print(query)
-        #     query = json.dumps(query)
-        #     col_saved_tasks = db()['saved_tasks']
-        #     col_saved_tasks.insert_one({
-        #         'query':query,
-        #         'name':self.params['name']
-        #     })
-        # except:
-        #     self.PrintException()
-        # self.allow_action = False
-
 
 class SaveTaskQuery(BaseHandler):
     def init_method(self):
@@ -511,23 +471,23 @@ class Dashboard(BaseHandler):
         try:
             queries = {}
             col_saved_tasks = db()['save_task_query']
-            for item in col_saved_tasks.find({'user_id':self.user_id}):
-                # print(item)
+            for item in col_saved_tasks.find({'user_id': self.user_id}):
                 query = {}
                 if 'tags' in item:
                     query['tags'] = {'$in': item['tags']}
                 if 'time' in item and item['time'] != 'now':
+                    print('not now')
                     if 'type_date' in item:
                         if 'from' in item:
-                            if 'amount' in item and 'time' in item:
-                                    if item['time'] == 'pass':
-                                        query[item['type_date']] = {
-                                            '$lte': datetime.strptime(item['from'], "%Y/%m/%d") - timedelta(
-                                                days=item['amount'])}
-                                    elif item['time'] == 'future':
-                                        query[item['type_date']] = {
-                                            '$gte': datetime.strptime(item['from'], "%Y/%m/%d") + timedelta(
-                                                days=item['amount'])}
+                            if 'amount' in item:
+                                if item['time'] == 'pass':
+                                    query[item['type_date']] = {
+                                        '$lte': datetime.strptime(item['from'], "%Y/%m/%d") - timedelta(
+                                            days=item['amount'])}
+                                elif item['time'] == 'future':
+                                    query[item['type_date']] = {
+                                        '$gte': datetime.strptime(item['from'], "%Y/%m/%d") + timedelta(
+                                            days=item['amount'])}
                         else:
                             if 'amount' in item and 'time' in item:
                                     if item['time'] == 'pass':
@@ -539,20 +499,24 @@ class Dashboard(BaseHandler):
                                             '$gte': datetime.now() + timedelta(
                                                 days=item['amount'])}
                 elif 'time' in item and item['time'] == 'now':
-                    query['type_date'] = datetime.now()
+                    print('now')
+                    date = item['from'] if 'from' in item else 'to_date'
+                    query[date] = datetime.strptime(str(datetime.now())[:10], "%Y-%m-%d")
+                    print(query)
                 queries[item['name']] = query
-                # print(query)
-                # print(queries)
-
-            # print(query)
-            # print(queries)
+            print(queries)
             results = {}
-            result_list = []
             col_tasks = db()['tasks']
-            for k, v in queries.items():
-                print(k)
-                for item in col_tasks.find(v):
-                    # print(item)
+            for items in queries:
+                print('---------')
+                print(queries[items])
+                print('---------')
+                result_list = []
+                for item in col_tasks.find(queries[items]):
+                    print('=======')
+                    print(items)
+                    print(queries[items])
+                    print('=======')
                     item['id'] = str(item['_id'])
                     del item['_id']
                     if 'create_date' in item:
@@ -563,11 +527,8 @@ class Dashboard(BaseHandler):
                         item['from_date'] = str(item['from_date'])
                     if 'to_date' in item:
                         item['to_date'] = str(item['to_date'])
-                    # print(item)
                     result_list.append(item)
-                results[k] = result_list
-                # print(results)
-            print(results)
+                results[items] = result_list
             self.set_output('public_operations', 'successful')
             self.output['data']['list'] = results
         except:
