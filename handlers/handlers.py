@@ -69,7 +69,7 @@ class Register(BaseHandler):
                 id = str(col_users.insert(self.params))
                 self.id = id
                 self.output['data']['item']['id'] = id
-                self.output['token'] = encode_token({'user_id': self.id}).decode()
+                # self.output['token'] = encode_token({'user_id': self.id}).decode()
                 self.set_output('public_operations', 'successful')
                 self.after_post()
             if consts.LOG_ACTIVE:
@@ -106,8 +106,8 @@ class ActiveAccount(BaseHandler):
                 user_info = col_users.find_one({
                     'mobile': self.params['mobile'],
                 })
-                self.output['token'] = encode_token(
-                    {'user_id': str(user_info['_id'])}).decode()
+                # self.output['token'] = encode_token(
+                #     {'user_id': str(user_info['_id'])}).decode()
 
                 # send_notification('welcome', str(user_info['_id']), '',
                 #                   consts.NOTIFICATIONS['users']['welcome']['title'][self.locale],
@@ -310,7 +310,7 @@ class ResetPassword(BaseHandler):
             col_users = db()['users']
             result = col_users.find_one_and_update({
                 'mobile': self.params['mobile'],
-                'pure_password': self.params['old_password'],
+                # 'pure_password': self.params['old_password'],
                 'activation_code': self.params['activation_code']
             },
                 {'$set': {'password': create_md5(self.params['new_password']),
@@ -396,7 +396,7 @@ class SaveTaskQuery(BaseHandler):
             'post': ['name']
         }
         self.inputs = {
-            'post': ['tags', 'amount', 'time', 'from', 'type_date','name']
+            'post': ['tags', 'amount', 'time', 'from', 'type_date', 'name']
         }
 
 
@@ -407,13 +407,24 @@ class Dashboard(BaseHandler):
             queries = {}
             col_saved_tasks = db()['save_task_query']
             for item in col_saved_tasks.find({'user_id': self.user_id}):
+                # print(item)
                 query = {}
                 if 'tags' in item:
                     query['tags'] = {'$in': item['tags']}
+                if 'from' in item and item['from'] == 'now':
+                    print(item)
+                    if 'type_date' in item and item['type_date'] == 'to_date':
+                        print('injaaaaaa')
+                        query[item['type_date']] = date_now + timedelta(
+                            days=item['amount'])
+                    elif 'type_date' in item and item['type_date'] == 'from_date':
+                        query[item['type_date']] = date_now - timedelta(
+                            days=item['amount'])
                 if 'time' in item and item['time'] != 'now':
                     if 'type_date' in item:
-                        if 'from' in item:
+                        if 'from' in item and item['from'] != 'now':
                             if 'amount' in item:
+                                # print('amount')
                                 if item['time'] == 'pass':
                                     query[item['type_date']] = {
                                         '$lte': datetime.strptime(item['from'], "%Y/%m/%d") - timedelta(
@@ -432,17 +443,19 @@ class Dashboard(BaseHandler):
                                     query[item['type_date']] = {
                                         '$gte': date_now + timedelta(
                                             days=item['amount'])}
+
                 elif 'time' in item and item['time'] == 'now':
-                    print('now')
-                    date = item['type_date'] if 'type_date' in item else 'to_date'
-                    query[date] = date_now
+                    # print('now')
+                    # date = item['type_date'] if 'type_date' in item else 'to_date'
+                    query['$and'] = [{'from_date': {'$lte': date_now}}, {'to_date': {'$gte': date_now}}]
                 queries[item['name']] = query
             print(queries)
             results = {}
             col_tasks = db()['tasks']
             for items in queries:
-                print('---------')
-                print(queries[items])
+                # print('---------')
+                # print(items)
+                # print(queries[items])
 
                 result_list = []
                 for item in col_tasks.find(queries[items]):
@@ -465,3 +478,24 @@ class Dashboard(BaseHandler):
         self.allow_action = False
 
 
+# class DeleteUser(BaseHandler):
+#     def init_method(self):
+#         self.tokenless = True
+#         self.inputs = {
+#             'post': ['mobile']
+#         }
+#         self.required = {
+#             'post': ['mobile']
+#         }
+#
+#     def before_post(self):
+#         try:
+#             self.method = 'users'
+#             print(self.params['mobile'])
+#             print(type(self.params['mobile']))
+#             col_users = db()['users']
+#             col_users.delete_one({'mobile': self.params['mobile']})
+#             self.set_output('public_operations', 'successful')
+#         except:
+#             self.PrintException()
+#         self.allow_action = False
