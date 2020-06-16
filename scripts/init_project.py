@@ -188,13 +188,6 @@ def insert_messages():
         },
         {
             'group': 'get_tasks',
-            'name': 'get_tasks_failed_params',
-            'code': 401,
-            'status': False,
-            'en': 'Condition is not in params'
-        },
-        {
-            'group': 'get_tasks',
             'name': 'get_tasks_failed',
             'code': 401,
             'status': False,
