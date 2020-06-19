@@ -36,8 +36,10 @@ col_users_roles.insert_many([
             'allow': ['get', 'post', 'put', 'delete'],
             'get': {},
             'post': {'user_id': '$uid'},
-            'put': {},
-            'delete': {}
+            'put': {
+                'query': {'user_id': '$uid'},
+                'set': {}},
+            'delete': {'user_id': '$uid'}
         },
     },
     {
