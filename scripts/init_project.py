@@ -177,7 +177,7 @@ def insert_messages():
             'name': 'activate_account',
             'code': 200,
             'status': True,
-            'en': 'Account Has Ben Activate'
+            'en': 'Account Has Been Activate'
         },
         {
             'group': 'user',
@@ -193,6 +193,20 @@ def insert_messages():
             'status': False,
             'en': 'Wrong argument in condition'
         },
+        {
+            'group': 'delete',
+            'name': 'delete_kon',
+            'code': 200,
+            'status': True,
+            'en': 'User Has Been Deleted'
+        },
+        {
+            'group': 'tasks',
+            'name': 'wrong_params',
+            'code': 401,
+            'status': False,
+            'en': 'Wrong Params'
+        }
     ])
 
 

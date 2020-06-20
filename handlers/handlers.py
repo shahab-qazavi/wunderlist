@@ -1,7 +1,5 @@
-__author__='Shahab Qazavi'
+__author__ = 'Shahab Qazavi'
 
-
-# from bson.json_util import loads
 import inspect
 from sms import sms
 from base_handler import BaseHandler, Colors
@@ -45,7 +43,7 @@ class Register(BaseHandler):
             self.params['password'] = create_md5(self.params['password'])
             # .encode('utf-8')
         except:
-            self.PrintException()
+            PrintException()
             return False
         return True
 
@@ -55,7 +53,7 @@ class Register(BaseHandler):
                      self.params['mobile'])
 
         except:
-            self.PrintException()
+            PrintException()
         return True
 
     def post(self, *args, **kwargs):
@@ -76,7 +74,7 @@ class Register(BaseHandler):
             if consts.LOG_ACTIVE:
                 self.log_status(self.output)
         except:
-            self.PrintException()
+            PrintException()
             self.set_output('public_operations', 'failed')
         self.kmwrite()
 
@@ -104,9 +102,9 @@ class ActiveAccount(BaseHandler):
                                               'activation_code': self.params['activation_code']},
                                              {'$set': {'confirmed': True}})
             if update_result['nModified'] == 1:
-            #     user_info = col_users.find_one({
-            #         'mobile': self.params['mobile'],
-            #     })
+                user_info = col_users.find_one({
+                    'mobile': self.params['mobile'],
+                })
                 # self.output['token'] = encode_token(
                 #     {'user_id': str(user_info['_id'])}).decode()
 
@@ -121,7 +119,7 @@ class ActiveAccount(BaseHandler):
             self.allow_action = False
             return True
         except:
-            self.PrintException()
+            PrintException()
             return False
 
 
@@ -168,7 +166,7 @@ class Login(BaseHandler):
                 else:
                     self.set_output('user', 'inactive')
         except:
-            self.PrintException()
+            PrintException()
             self.set_output('public_operations', 'failed')
 
         try:
@@ -181,7 +179,7 @@ class Login(BaseHandler):
                 'notes': self.note_id
             })
         except:
-            self.PrintException()
+            PrintException()
         self.allow_action = False
 
 
@@ -225,10 +223,10 @@ class Profile(BaseHandler):
                     self.output['data']['item']['people'] = user_people
                     self.set_output('public_operations', 'successful')
                 except:
-                    self.PrintException()
+                    PrintException()
                     self.set_output('field_error', 'id_format')
         except:
-            self.PrintException()
+            PrintException()
             self.set_output('public_operations', 'failed')
         self.kmwrite()
 
@@ -256,7 +254,7 @@ class Profile(BaseHandler):
                         'pic': self.params['pic']
                     }}, multi=True)
         except:
-            self.PrintException()
+            PrintException()
             self.set_output('public_operations', 'failed')
         if consts.LOG_ACTIVE:
             self.log_status(self.output)
@@ -264,8 +262,11 @@ class Profile(BaseHandler):
         self.kmwrite()
 
 
-class ForgoPassword(BaseHandler):
+class ForgotPassword(BaseHandler):
     def init_method(self):
+        self.inputs = {
+            'post': ['']
+        }
         self.tokenless = True
 
     def post(self, *args, **kwargs):
@@ -289,7 +290,7 @@ class ForgoPassword(BaseHandler):
                 self.after_post()
 
             except:
-                self.PrintException()
+                PrintException()
                 self.set_output('public_operations', 'failed')
         self.kmwrite()
 
@@ -321,7 +322,7 @@ class ResetPassword(BaseHandler):
             else:
                 self.set_output('public_operations', 'successful')
         except:
-            self.PrintException()
+            PrintException()
             self.set_output('public_operations', 'failed')
             return False
         self.allow_action = False
@@ -342,42 +343,54 @@ class Tasks(BaseHandler):
         self.casting['lists'] = ['tags', 'people', 'attachment']
 
     def before_post(self):
-        try:
-            if 'from_date' in self.params and 'to_date' in self.params:
-                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y/%m/%d %H:%M:%S")
-                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y/%m/%d %H:%M:%S")
+        inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
+                  'location', 'remind', 'people', 'user_id']
+        count = 0
+        for item in self.params:
+            if item not in inputs:
+                count += 1
+        if count == 0:
+            try:
+                if 'from_date' in self.params and 'to_date' in self.params:
+                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d")
+                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d")
 
-            elif 'from_date' in self.params and 'to_date' not in self.params:
+                elif 'from_date' in self.params and 'to_date' not in self.params:
 
-                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y/%m/%d %H:%M:%S")
+                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d")
 
-            elif 'to_date' in self.params and 'from_date' not in self.params:
+                elif 'to_date' in self.params and 'from_date' not in self.params:
 
-                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y/%m/%d %H:%M:%S")
-        except:
-            self.PrintException()
+                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d")
+
+            except:
+                PrintException()
+                return False
+            return True
+        else:
+            self.set_output('tasks', 'wrong_params')
+            return False
 
     def before_get(self):
         try:
-            if 'id' in self.params:
-                col_tasks = db()['tasks']
-                user_task = col_tasks.find_one({
-                    '_id': ObjectId(self.params['id'])
-                })
-                del user_task['_id']
-                user_task['create_date'] = str(user_task['create_date'])
-                user_task['last_update'] = str(user_task['last_update'])
-                print(user_task)
-                self.output['data']['item'] = user_task
+            col_tasks = db()['tasks']
+            user_task = col_tasks.find_one({
+                '_id': ObjectId(self.user_id)
+            })
+            del user_task['_id']
+            user_task['create_date'] = str(user_task['create_date'])
+            user_task['last_update'] = str(user_task['last_update'])
+            print(user_task)
+            self.output['data']['item'] = user_task
         except:
-            self.PrintException()
+            PrintException()
 
     def before_delete(self):
         try:
             col_tasks = db()['tasks']
-            col_tasks.delete_one({'_id': self.params['user_id']})
+            col_tasks.delete_one({'_id': self.user_id})
         except:
-            self.PrintException()
+            PrintException()
         self.allow_action = False
 
 
@@ -408,11 +421,14 @@ class Dashboard(BaseHandler):
             queries = {}
             col_saved_tasks = db()['save_task_query']
             for item in col_saved_tasks.find({'user_id': self.user_id}):
+                # print(item)
                 query = {}
                 if 'tags' in item:
                     query['tags'] = {'$in': item['tags']}
                 if 'from' in item and item['from'] == 'now':
+                    print(item)
                     if 'type_date' in item and item['type_date'] == 'to_date':
+                        print('injaaaaaa')
                         query[item['type_date']] = date_now + timedelta(
                             days=item['amount'])
                     elif 'type_date' in item and item['type_date'] == 'from_date':
@@ -425,11 +441,11 @@ class Dashboard(BaseHandler):
                                 # print('amount')
                                 if item['time'] == 'pass':
                                     query[item['type_date']] = {
-                                        '$lte': datetime.strptime(item['from'], "%Y/%m/%d") - timedelta(
+                                        '$lte': datetime.strptime(item['from'], "%Y-%m-%d") - timedelta(
                                             days=item['amount'])}
                                 elif item['time'] == 'future':
                                     query[item['type_date']] = {
-                                        '$gte': datetime.strptime(item['from'], "%Y/%m/%d") + timedelta(
+                                        '$gte': datetime.strptime(item['from'], "%Y-%m-%d") + timedelta(
                                             days=item['amount'])}
                         elif 'from' not in item:
                             if 'amount' in item and 'time' in item:
@@ -451,9 +467,10 @@ class Dashboard(BaseHandler):
             results = {}
             col_tasks = db()['tasks']
             for items in queries:
-                print('---------')
-                print(items)
-                print(queries[items])
+                # print('---------')
+                # print(items)
+                # print(queries[items])
+
                 result_list = []
                 for item in col_tasks.find(queries[items]):
                     item['id'] = str(item['_id'])
@@ -471,6 +488,28 @@ class Dashboard(BaseHandler):
             self.set_output('public_operations', 'successful')
             self.output['data']['list'] = results
         except:
-            self.PrintException()
+            PrintException()
         self.allow_action = False
 
+
+class DeleteUser(BaseHandler):
+    def init_method(self):
+        self.tokenless = True
+        self.inputs = {
+            'post': ['mobile']
+        }
+        self.required = {
+            'post': ['mobile']
+        }
+
+    def before_post(self):
+        try:
+            self.method = 'users'
+            print(self.params['mobile'])
+            print(type(self.params['mobile']))
+            col_users = db()['users']
+            col_users.delete_one({'mobile': self.params['mobile']})
+            self.set_output('public_operations', 'successful')
+        except:
+            PrintException()
+        self.allow_action = False
