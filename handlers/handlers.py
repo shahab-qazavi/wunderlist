@@ -1,10 +1,13 @@
+__author__='Shahab Qazavi'
 
+
+# from bson.json_util import loads
 import inspect
 from sms import sms
 from base_handler import BaseHandler, Colors
 from publics import PrintException, create_md5, encode_token, db, random_digits, send_sms,\
     send_registration_email, consts, send_notification
-from datetime import datetime, timedelta
+from datetime import datetime , timedelta
 from bson import ObjectId
 import json
 
@@ -42,7 +45,7 @@ class Register(BaseHandler):
             self.params['password'] = create_md5(self.params['password'])
             # .encode('utf-8')
         except:
-            PrintException()
+            self.PrintException()
             return False
         return True
 
@@ -52,7 +55,7 @@ class Register(BaseHandler):
                      self.params['mobile'])
 
         except:
-            PrintException()
+            self.PrintException()
         return True
 
     def post(self, *args, **kwargs):
@@ -73,7 +76,7 @@ class Register(BaseHandler):
             if consts.LOG_ACTIVE:
                 self.log_status(self.output)
         except:
-            PrintException()
+            self.PrintException()
             self.set_output('public_operations', 'failed')
         self.kmwrite()
 
@@ -118,7 +121,7 @@ class ActiveAccount(BaseHandler):
             self.allow_action = False
             return True
         except:
-            PrintException()
+            self.PrintException()
             return False
 
 
@@ -165,7 +168,7 @@ class Login(BaseHandler):
                 else:
                     self.set_output('user', 'inactive')
         except:
-            PrintException()
+            self.PrintException()
             self.set_output('public_operations', 'failed')
 
         try:
@@ -178,7 +181,7 @@ class Login(BaseHandler):
                 'notes': self.note_id
             })
         except:
-            PrintException()
+            self.PrintException()
         self.allow_action = False
 
 
@@ -222,10 +225,10 @@ class Profile(BaseHandler):
                     self.output['data']['item']['people'] = user_people
                     self.set_output('public_operations', 'successful')
                 except:
-                    PrintException()
+                    self.PrintException()
                     self.set_output('field_error', 'id_format')
         except:
-            PrintException()
+            self.PrintException()
             self.set_output('public_operations', 'failed')
         self.kmwrite()
 
@@ -253,7 +256,7 @@ class Profile(BaseHandler):
                         'pic': self.params['pic']
                     }}, multi=True)
         except:
-            PrintException()
+            self.PrintException()
             self.set_output('public_operations', 'failed')
         if consts.LOG_ACTIVE:
             self.log_status(self.output)
@@ -286,7 +289,7 @@ class ForgoPassword(BaseHandler):
                 self.after_post()
 
             except:
-                PrintException()
+                self.PrintException()
                 self.set_output('public_operations', 'failed')
         self.kmwrite()
 
@@ -318,7 +321,7 @@ class ResetPassword(BaseHandler):
             else:
                 self.set_output('public_operations', 'successful')
         except:
-            PrintException()
+            self.PrintException()
             self.set_output('public_operations', 'failed')
             return False
         self.allow_action = False
@@ -341,23 +344,25 @@ class Tasks(BaseHandler):
     def before_post(self):
         try:
             if 'from_date' in self.params and 'to_date' in self.params:
-                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d")
-                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d")
+                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y/%m/%d %H:%M:%S")
+                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y/%m/%d %H:%M:%S")
+
             elif 'from_date' in self.params and 'to_date' not in self.params:
-                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d")
+
+                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y/%m/%d %H:%M:%S")
+
             elif 'to_date' in self.params and 'from_date' not in self.params:
-                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d")
+
+                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y/%m/%d %H:%M:%S")
         except:
-            PrintException()
-            return False
-        return True
+            self.PrintException()
 
     def before_get(self):
         try:
             if 'id' in self.params:
                 col_tasks = db()['tasks']
                 user_task = col_tasks.find_one({
-                    '_id': ObjectId(self.user_id)
+                    '_id': ObjectId(self.params['id'])
                 })
                 del user_task['_id']
                 user_task['create_date'] = str(user_task['create_date'])
@@ -365,14 +370,14 @@ class Tasks(BaseHandler):
                 print(user_task)
                 self.output['data']['item'] = user_task
         except:
-            PrintException()
+            self.PrintException()
 
     def before_delete(self):
         try:
             col_tasks = db()['tasks']
             col_tasks.delete_one({'_id': self.params['user_id']})
         except:
-            PrintException()
+            self.PrintException()
         self.allow_action = False
 
 
@@ -420,11 +425,11 @@ class Dashboard(BaseHandler):
                                 # print('amount')
                                 if item['time'] == 'pass':
                                     query[item['type_date']] = {
-                                        '$lte': datetime.strptime(item['from'], "%Y-%m-%d") - timedelta(
+                                        '$lte': datetime.strptime(item['from'], "%Y/%m/%d") - timedelta(
                                             days=item['amount'])}
                                 elif item['time'] == 'future':
                                     query[item['type_date']] = {
-                                        '$gte': datetime.strptime(item['from'], "%Y-%m-%d") + timedelta(
+                                        '$gte': datetime.strptime(item['from'], "%Y/%m/%d") + timedelta(
                                             days=item['amount'])}
                         elif 'from' not in item:
                             if 'amount' in item and 'time' in item:
@@ -466,6 +471,6 @@ class Dashboard(BaseHandler):
             self.set_output('public_operations', 'successful')
             self.output['data']['list'] = results
         except:
-            PrintException()
+            self.PrintException()
         self.allow_action = False
 
