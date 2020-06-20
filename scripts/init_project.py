@@ -206,7 +206,7 @@ def insert_messages():
             'code': 401,
             'status': False,
             'en': 'Wrong Params'
-        },
+        }
     ])
 
 

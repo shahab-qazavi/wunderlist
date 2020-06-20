@@ -492,24 +492,24 @@ class Dashboard(BaseHandler):
         self.allow_action = False
 
 
-# class DeleteUser(BaseHandler):
-#     def init_method(self):
-#         self.tokenless = True
-#         self.inputs = {
-#             'post': ['mobile']
-#         }
-#         self.required = {
-#             'post': ['mobile']
-#         }
-#
-#     def before_post(self):
-#         try:
-#             self.method = 'users'
-#             print(self.params['mobile'])
-#             print(type(self.params['mobile']))
-#             col_users = db()['users']
-#             col_users.delete_one({'mobile': self.params['mobile']})
-#             self.set_output('public_operations', 'successful')
-#         except:
-#             PrintException()
-#         self.allow_action = False
+class DeleteUser(BaseHandler):
+    def init_method(self):
+        self.tokenless = True
+        self.inputs = {
+            'post': ['mobile']
+        }
+        self.required = {
+            'post': ['mobile']
+        }
+
+    def before_post(self):
+        try:
+            self.method = 'users'
+            print(self.params['mobile'])
+            print(type(self.params['mobile']))
+            col_users = db()['users']
+            col_users.delete_one({'mobile': self.params['mobile']})
+            self.set_output('public_operations', 'successful')
+        except:
+            PrintException()
+        self.allow_action = False
