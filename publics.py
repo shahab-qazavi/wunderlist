@@ -123,7 +123,7 @@ class consts:
     import os
     ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
     page_size = 20
-    MAX_TOKEN_DURATION = 1000000
+    MAX_TOKEN_DURATION = 7000000
     MESSAGES = load_messages()
     NOTIFICATIONS = load_notifications()
     CONSOLE_LOG = True

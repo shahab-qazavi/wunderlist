@@ -338,17 +338,18 @@ class Tasks(BaseHandler):
             'post': ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
                      'location', 'remind', 'people']
         }
-        self.casting['booleans'] = ['remind']
+        self.casting['booleans'] = ['remind','is_done', 'favorite']
         self.casting['dates'] = ['from_date', 'to_date']
         self.casting['lists'] = ['tags', 'people', 'attachment']
 
     def before_post(self):
         inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
-                  'location', 'remind', 'people', 'user_id']
+                  'location', 'remind', 'people', 'user_id', 'is_done', 'favorite']
         count = 0
         for item in self.params:
             if item not in inputs:
                 count += 1
+        print(self.params)
         if count == 0:
             try:
                 if 'from_date' in self.params and 'to_date' in self.params:
@@ -356,11 +357,9 @@ class Tasks(BaseHandler):
                     self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d")
 
                 elif 'from_date' in self.params and 'to_date' not in self.params:
-
                     self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d")
 
                 elif 'to_date' in self.params and 'from_date' not in self.params:
-
                     self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d")
 
             except:
@@ -374,16 +373,30 @@ class Tasks(BaseHandler):
     def before_get(self):
         try:
             col_tasks = db()['tasks']
-            user_task = col_tasks.find_one({
-                '_id': ObjectId(self.user_id)
-            })
-            del user_task['_id']
-            user_task['create_date'] = str(user_task['create_date'])
-            user_task['last_update'] = str(user_task['last_update'])
-            print(user_task)
-            self.output['data']['item'] = user_task
+            tasks = []
+            for user_task in col_tasks.find({'user_id': str(self.user_id)}).sort([('create_date', -1)]):
+                user_task['task_id'] = str(user_task['_id'])
+                del user_task['_id']
+                # print(user_task)
+                user_task['from_date'] = str(user_task['from_date'])
+                user_task['to_date'] = str(user_task['to_date'])
+                # user_task['create_date'] = str(user_task['create_date'])
+                # user_task['last_update'] = str(user_task['last_update'])
+                del user_task['create_date']
+                del user_task['last_update']
+                del user_task['user_id']
+
+                tasks.append(user_task)
+            # tasks = sorted(tasks, reverse=True)
+            print(tasks)
+            # print(type(tasks))
+            self.set_output('public_operations', 'successful')
+            self.output['data']['list'] = tasks
         except:
             PrintException()
+            return False
+        self.allow_action = False
+        return True
 
     def before_delete(self):
         try:
@@ -391,7 +404,10 @@ class Tasks(BaseHandler):
             col_tasks.delete_one({'_id': self.user_id})
         except:
             PrintException()
+            return False
         self.allow_action = False
+        return True
+
 
 
 class People(BaseHandler):
@@ -467,9 +483,6 @@ class Dashboard(BaseHandler):
             results = {}
             col_tasks = db()['tasks']
             for items in queries:
-                # print('---------')
-                # print(items)
-                # print(queries[items])
 
                 result_list = []
                 for item in col_tasks.find(queries[items]):
