@@ -1,4 +1,4 @@
-from handlers.handlers import Register, ActiveAccount, Profile, Login, ResetPassword, ForgoPassword,\
+from handlers.handlers import Register, ActiveAccount, Profile, Login, ResetPassword, ForgotPassword,\
     People, Tasks, Dashboard, SaveTaskQuery
 
 
