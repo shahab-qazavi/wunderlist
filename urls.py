@@ -10,7 +10,7 @@ url_patterns = [
     ("/v1/login", Login, None, "login_v1"),
     ("/v1/profile/?([^/]+)?", Profile, None, "profile_v1"),
     ("/v1/reset_password/?([^/]+)?", ResetPassword, None, "reset_password_v1"),
-    ("/v1/forgot_password/?([^/]+)?", ForgoPassword, None, "forgot_password_v1"),
+    ("/v1/forgot_password/?([^/]+)?", ForgotPassword, None, "forgot_password_v1"),
     ("/v1/tasks/?([^/]+)?", Tasks, None, "tasks_v1"),
     ("/v1/people/?([^/]+)?", People, None, "people_v1"),
     ("/v1/dashboard/?([^/]+)?", Dashboard, None, "dashboard_v1"),
