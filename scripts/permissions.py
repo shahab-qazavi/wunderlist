@@ -1,5 +1,5 @@
 import sys
-sys.path.append('/home/root/dev/wunderlist')
+sys.path.append('/root/dev/wunderlist')
 from publics import db, set_db
 from bson import ObjectId
 set_db('wunderlist')
