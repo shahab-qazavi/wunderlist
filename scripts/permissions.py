@@ -1,11 +1,10 @@
 import sys
 sys.path.append('/root/dev/wunderlist')
-# from publics import db, set_db
+from publics import db, set_db
 from bson import ObjectId
-# set_db('wunderlist')
-from pymongo import MongoClient
-db = MongoClient()['wunderlist']
-col_users_roles = db['users_roles']
+set_db('wunderlist')
+
+col_users_roles = db()['users_roles']
 col_users_roles.drop()
 col_users_roles.insert_many([
     {
