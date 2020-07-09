@@ -133,7 +133,7 @@ class consts:
     MESSAGE_SERVER_PORT = '7070'
     PDP_IMAGES = PDP_ROOT + 'images/'
     SERVER_ADDRESS = 'https://server1.onmiz.org'
-    SERVER_PORT = '8585'
+    SERVER_PORT = '7575'
     TEST_SERVER_PORT = '8000'
     DB_NAME = 'wunderlist'
     TEST_DB_NAME = 'tdb_name'
