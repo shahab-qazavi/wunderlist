@@ -404,6 +404,21 @@ class Tasks(BaseHandler):
             return False
         self.allow_action = False
         return True
+    def before_put(self):
+        try:
+            if 'from_date' in self.params and 'to_date' in self.params:
+                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
+                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+
+            elif 'from_date' in self.params and 'to_date' not in self.params:
+                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
+
+            elif 'to_date' in self.params and 'from_date' not in self.params:
+                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+        except:
+            PrintException()
+            return False
+        return True
 
 
 class People(BaseHandler):
