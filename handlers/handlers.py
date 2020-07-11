@@ -362,6 +362,9 @@ class Tasks(BaseHandler):
                 elif 'to_date' in self.params and 'from_date' not in self.params:
                     self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
 
+                self.params['is_done'] = False
+                self.params['is_favorite'] = False
+
             except:
                 PrintException()
                 return False
@@ -401,7 +404,8 @@ class Tasks(BaseHandler):
     def before_delete(self):
         try:
             col_tasks = db()['tasks']
-            col_tasks.delete_one({'_id': self.user_id})
+            col_tasks.delete_one({'_id': ObjectId(self.params['id'])})
+            self.set_output('public_operations', 'successful')
         except:
             PrintException()
             return False
