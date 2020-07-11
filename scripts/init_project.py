@@ -105,7 +105,7 @@ def insert_messages():
         {
             'group': 'public_operations',
             'name': 'record_not_found',
-            'code': 401,
+            'code': 404,
             'status': False,
             'en': 'Record not found'
         },
