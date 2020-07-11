@@ -404,6 +404,7 @@ class Tasks(BaseHandler):
             return False
         self.allow_action = False
         return True
+
     def before_put(self):
         try:
             if 'from_date' in self.params and 'to_date' in self.params:
