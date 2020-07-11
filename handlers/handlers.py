@@ -377,7 +377,7 @@ class Tasks(BaseHandler):
             col_tasks = db()['tasks']
             tasks = []
             for user_task in col_tasks.find({'user_id': str(self.user_id)}).sort([('create_date', -1)]):
-                user_task['task_id'] = str(user_task['_id'])
+                user_task['id'] = str(user_task['_id'])
                 del user_task['_id']
                 user_task['from_date'] = str(user_task['from_date'])
                 user_task['to_date'] = str(user_task['to_date'])
