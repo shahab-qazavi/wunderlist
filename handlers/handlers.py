@@ -397,7 +397,7 @@ class Tasks(BaseHandler):
     def before_delete(self):
         try:
             col_tasks = db()['tasks']
-            if col_tasks.find_one({'_id':ObjectId(self.params['id'])}):
+            if col_tasks.find_one({'_id': ObjectId(self.params['id'])}):
                 col_tasks.delete_one({'_id': ObjectId(self.params['id'])})
                 self.set_output('public_operations', 'successful')
             else:
