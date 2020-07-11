@@ -397,8 +397,12 @@ class Tasks(BaseHandler):
     def before_delete(self):
         try:
             col_tasks = db()['tasks']
-            col_tasks.delete_one({'_id': ObjectId(self.params['id'])})
-            self.set_output('public_operations', 'successful')
+            if col_tasks.find_one({'_id':ObjectId(self.params['id'])}):
+                col_tasks.delete_one({'_id': ObjectId(self.params['id'])})
+                self.set_output('public_operations', 'successful')
+            else:
+                self.set_output('public_operations', 'record_not_found')
+                return False
         except:
             PrintException()
             return False
