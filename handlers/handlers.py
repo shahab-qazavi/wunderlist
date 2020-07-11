@@ -388,7 +388,7 @@ class Tasks(BaseHandler):
 
                 tasks.append(user_task)
             # tasks = sorted(tasks, reverse=True)
-            print(tasks)
+            # print(tasks)
             # print(type(tasks))
             self.set_output('public_operations', 'successful')
             self.output['data']['list'] = tasks
