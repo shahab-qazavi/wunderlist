@@ -353,14 +353,14 @@ class Tasks(BaseHandler):
         if count == 0:
             try:
                 if 'from_date' in self.params and 'to_date' in self.params:
-                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d")
-                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d")
+                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
+                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
 
                 elif 'from_date' in self.params and 'to_date' not in self.params:
-                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d")
+                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
 
                 elif 'to_date' in self.params and 'from_date' not in self.params:
-                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d")
+                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
 
             except:
                 PrintException()
@@ -433,7 +433,7 @@ class SaveTaskQuery(BaseHandler):
 class Dashboard(BaseHandler):
     def before_get(self):
         try:
-            date_now = datetime.strptime(str(datetime.now())[:10], "%Y-%m-%d")
+            date_now = datetime.strptime(str(datetime.now())[:10], "%Y-%m-%d %H:%M:%S")
             queries = {}
             col_saved_tasks = db()['save_task_query']
             for item in col_saved_tasks.find({'user_id': self.user_id}):
@@ -457,11 +457,11 @@ class Dashboard(BaseHandler):
                                 # print('amount')
                                 if item['time'] == 'pass':
                                     query[item['type_date']] = {
-                                        '$lte': datetime.strptime(item['from'], "%Y-%m-%d") - timedelta(
+                                        '$lte': datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S") - timedelta(
                                             days=item['amount'])}
                                 elif item['time'] == 'future':
                                     query[item['type_date']] = {
-                                        '$gte': datetime.strptime(item['from'], "%Y-%m-%d") + timedelta(
+                                        '$gte': datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S") + timedelta(
                                             days=item['amount'])}
                         elif 'from' not in item:
                             if 'amount' in item and 'time' in item:
