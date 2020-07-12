@@ -421,7 +421,7 @@ class Tasks(BaseHandler):
     def before_put(self):
         try:
             inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
-                  'location', 'remind', 'people', 'is_done', 'is_favorite']
+                  'location', 'remind', 'people', 'is_done', 'is_favorite','id']
             print(self.params)
             count = 0
             for item in self.params:
