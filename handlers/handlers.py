@@ -422,6 +422,7 @@ class Tasks(BaseHandler):
         try:
             inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
                   'location', 'remind', 'people', 'is_done', 'is_favorite']
+            print(self.params)
             count = 0
             for item in self.params:
                 if item not in inputs:
