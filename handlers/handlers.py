@@ -259,6 +259,9 @@ class Profile(BaseHandler):
                             'name': self.params['name'],
                             'pic': self.params['pic']
                         }}, multi=True)
+                else:
+                    self.set_output('tasks', 'wrong_params')
+                    return False
         except:
             PrintException()
             self.set_output('public_operations', 'failed')
@@ -433,6 +436,9 @@ class Tasks(BaseHandler):
 
                 elif 'to_date' in self.params and 'from_date' not in self.params:
                     self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+            else:
+                self.set_output('tasks', 'wrong_params')
+                return False
         except:
             PrintException()
             return False
