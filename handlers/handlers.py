@@ -186,7 +186,7 @@ class Login(BaseHandler):
 class Profile(BaseHandler):
     def init_method(self):
         self.inputs = {
-            'put': ['name', 'family', 'email', 'password', 'pic']
+            'put': ['name', 'family', 'email', 'password', 'pic', 'nav_color', 'background_color']
         }
 
     def before_get(self):
@@ -235,24 +235,30 @@ class Profile(BaseHandler):
             self.method = 'put'
             self.module = 'users'
             if self.pre_put():
-                need_consistency_update = any(x in self.params for x in ['pic', 'name', 'family'])
-                if 'password' in self.params:
-                    self.params['password'] = create_md5(self.params['password'])
-                    self.params['password_pure'] = self.params['password']
-                col_users = db()['users']
-                col_users.update({'_id': ObjectId(self.user_id)}, {'$set': self.params})
-                if need_consistency_update:
-                    col_people = db()['people']
-                    col_tasks = db()['tasks']
-                    doc = {}
-                    if 'name' in self.params: doc['people.name'] = self.params['name']
-                    if 'family' in self.params: doc['people.family'] = self.params['family']
-                    if 'pic' in self.params: doc['people.pic'] = self.params['pic']
-                    col_tasks.update({'people.id': self.user_id}, {'$set': doc}, multi=True)
-                    col_people.update({'user_id': self.user_id}, {'$set': {
-                        'name': self.params['name'],
-                        'pic': self.params['pic']
-                    }}, multi=True)
+                inputs = ['name', 'family', 'email', 'password', 'pic', 'nav_color', 'background_color']
+                count = 0
+                for item in self.params:
+                    if item not in inputs:
+                        count += 1
+                if count == 0:
+                    need_consistency_update = any(x in self.params for x in ['pic', 'name', 'family'])
+                    if 'password' in self.params:
+                        self.params['password'] = create_md5(self.params['password'])
+                        self.params['password_pure'] = self.params['password']
+                    col_users = db()['users']
+                    col_users.update({'_id': ObjectId(self.user_id)}, {'$set': self.params})
+                    if need_consistency_update:
+                        col_people = db()['people']
+                        col_tasks = db()['tasks']
+                        doc = {}
+                        if 'name' in self.params: doc['people.name'] = self.params['name']
+                        if 'family' in self.params: doc['people.family'] = self.params['family']
+                        if 'pic' in self.params: doc['people.pic'] = self.params['pic']
+                        col_tasks.update({'people.id': self.user_id}, {'$set': doc}, multi=True)
+                        col_people.update({'user_id': self.user_id}, {'$set': {
+                            'name': self.params['name'],
+                            'pic': self.params['pic']
+                        }}, multi=True)
         except:
             PrintException()
             self.set_output('public_operations', 'failed')
@@ -344,7 +350,7 @@ class Tasks(BaseHandler):
 
     def before_post(self):
         inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
-                  'location', 'remind', 'people', 'user_id', 'is_done', 'favorite']
+                  'location', 'remind', 'people', 'user_id', 'is_done', 'is_favorite']
         count = 0
         for item in self.params:
             if item not in inputs:
@@ -411,15 +417,22 @@ class Tasks(BaseHandler):
 
     def before_put(self):
         try:
-            if 'from_date' in self.params and 'to_date' in self.params:
-                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
-                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+            inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
+                  'location', 'remind', 'people', 'is_done', 'is_favorite']
+            count = 0
+            for item in self.params:
+                if item not in inputs:
+                    count += 1
+            if count == 0:
+                if 'from_date' in self.params and 'to_date' in self.params:
+                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
+                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
 
-            elif 'from_date' in self.params and 'to_date' not in self.params:
-                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
+                elif 'from_date' in self.params and 'to_date' not in self.params:
+                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
 
-            elif 'to_date' in self.params and 'from_date' not in self.params:
-                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+                elif 'to_date' in self.params and 'from_date' not in self.params:
+                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
         except:
             PrintException()
             return False
