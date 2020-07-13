@@ -384,19 +384,30 @@ class Tasks(BaseHandler):
     def before_get(self):
         try:
             col_tasks = db()['tasks']
-            tasks = []
-            for user_task in col_tasks.find({'user_id': str(self.user_id)}).sort([('create_date', -1)]):
-                user_task['id'] = str(user_task['_id'])
-                del user_task['_id']
-                user_task['from_date'] = str(user_task['from_date'])
-                user_task['to_date'] = str(user_task['to_date'])
-                del user_task['create_date']
-                del user_task['last_update']
-                del user_task['user_id']
-                tasks.append(user_task)
-            # tasks = sorted(tasks, reverse=True)
+            if 'id' in self.params:
+                task = col_tasks.find_one({'_id': ObjectId(self.params['id'])})
+                task['id'] = str(task['_id'])
+                task['from_date'] = str(task['from_date'])
+                task['to_date'] = str(task['to_date'])
+                del task['_id']
+                del task['create_date']
+                del task['last_update']
+                del task['user_id']
+                self.output['data']['item'] = task
+            else:
+                tasks = []
+                for user_task in col_tasks.find({'user_id': str(self.user_id)}).sort([('create_date', -1)]):
+                    user_task['id'] = str(user_task['_id'])
+                    del user_task['_id']
+                    user_task['from_date'] = str(user_task['from_date'])
+                    user_task['to_date'] = str(user_task['to_date'])
+                    del user_task['create_date']
+                    del user_task['last_update']
+                    del user_task['user_id']
+                    tasks.append(user_task)
+                # tasks = sorted(tasks, reverse=True)
+                self.output['data']['list'] = tasks
             self.set_output('public_operations', 'successful')
-            self.output['data']['list'] = tasks
         except:
             PrintException()
             return False
