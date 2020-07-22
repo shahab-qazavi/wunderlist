@@ -199,10 +199,13 @@ class Profile(BaseHandler):
             self.method = 'get'
             if self.pre_get():
                 try:
-                    fields = {}
+
                     if len(self.fields) > 0:
+                        fields = {}
                         for item in self.fields:
                             fields[item] = 1
+                    else:
+                        fields = {'name': 1, 'family': 1, 'email': 1, 'pic': 1}
                     col_users = db()['users']
                     print('-----------------------------')
                     print(self.user_id)
