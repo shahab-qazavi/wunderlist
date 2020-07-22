@@ -213,7 +213,10 @@ class Profile(BaseHandler):
                     col_tasks = db()['tasks']
                     user_tasks = []
                     for item in col_tasks.find({'user_id':self.user_id}):
-
+                        if 'from_date' in item:
+                            item['from_date'] = str(item['from_date'])
+                        if 'to_date' in item:
+                            item['to_date'] = str(item['to_date'])
                         item['id'] = item['_id']
                         del item['_id']
                         user_tasks.append(item)
