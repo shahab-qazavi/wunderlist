@@ -200,8 +200,9 @@ class Profile(BaseHandler):
             if self.pre_get():
                 try:
                     fields = {}
-                    for item in self.fields:
-                        fields[item] = 1
+                    if len(self.fields) > 0:
+                        for item in self.fields:
+                            fields[item] = 1
                     col_users = db()['users']
                     print('-----------------------------')
                     print(self.user_id)
@@ -213,7 +214,6 @@ class Profile(BaseHandler):
                     col_tasks = db()['tasks']
                     user_tasks = []
                     for item in col_tasks.find({'user_id': {'$in': [self.user_id]}}):
-
                         item['create_date'] = str(item['create_date'])
                         item['last_update'] = str(item['last_update'])
                         if 'from_date' in item:
