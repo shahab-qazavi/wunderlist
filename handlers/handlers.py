@@ -210,9 +210,10 @@ class Profile(BaseHandler):
                     user_info = col_users.find_one({'_id':ObjectId(self.user_id)}, fields)
                     user_info['id'] = str(user_info['_id'])
                     del user_info['_id']
-                    col_tasks = db()['task']
+                    col_tasks = db()['tasks']
                     user_tasks = []
-                    for item in col_tasks.find({'user_id':{'$in':[self.user_id]}}):
+                    for item in col_tasks.find({'user_id':self.user_id}):
+
                         item['id'] = item['_id']
                         del item['_id']
                         user_tasks.append(item)
