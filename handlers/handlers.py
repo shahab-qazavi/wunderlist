@@ -212,7 +212,7 @@ class Profile(BaseHandler):
                     del user_info['_id']
                     col_tasks = db()['tasks']
                     user_tasks = []
-                    for item in col_tasks.find({'user_id':self.user_id}):
+                    for item in col_tasks.find({'user_id': {'$in': [self.user_id]}}):
 
                         item['create_date'] = str(item['create_date'])
                         item['last_update'] = str(item['last_update'])
@@ -225,7 +225,7 @@ class Profile(BaseHandler):
                         user_tasks.append(item)
                     user_people = []
                     col_people = db()['people']
-                    for item in col_people.find({'user_id':{'$in':[self.user_id]}}):
+                    for item in col_people.find({'user_id': {'$in': [self.user_id]}}):
                         item['id'] = str(item['_id'])
                         del item['_id']
                         user_people.append(item)
