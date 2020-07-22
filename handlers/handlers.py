@@ -207,23 +207,26 @@ class Profile(BaseHandler):
                     else:
                         fields = {'name': 1, 'family': 1, 'email': 1, 'pic': 1}
                     col_users = db()['users']
-                    print('-----------------------------')
-                    print(self.user_id)
-                    print(self.fields)
-                    print('-----------------------------')
+                    # print('-----------------------------')
+                    # print(self.user_id)
+                    # print(self.fields)
+                    # print('-----------------------------')
                     user_info = col_users.find_one({'_id': ObjectId(self.user_id)}, fields)
                     user_info['id'] = str(user_info['_id'])
                     del user_info['_id']
                     col_tasks = db()['tasks']
                     user_tasks = []
                     for item in col_tasks.find({'user_id': {'$in': [self.user_id]}}):
-                        item['create_date'] = str(item['create_date'])
-                        item['last_update'] = str(item['last_update'])
+                        del item['last_update']
+                        del item['create_date']
+
+                        # item['create_date'] = str(item['create_date'])
+                        # item['last_update'] = str(item['last_update'])
                         if 'from_date' in item:
                             item['from_date'] = str(item['from_date'])
                         if 'to_date' in item:
                             item['to_date'] = str(item['to_date'])
-                        item['id'] = str(item['_id'])
+                        # item['id'] = str(item['_id'])
                         del item['_id']
                         user_tasks.append(item)
                     user_people = []
