@@ -222,7 +222,6 @@ class Profile(BaseHandler):
                             item['to_date'] = str(item['to_date'])
                         item['id'] = str(item['_id'])
                         del item['_id']
-                        print(item)
                         user_tasks.append(item)
                     user_people = []
                     col_people = db()['people']
