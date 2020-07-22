@@ -207,7 +207,7 @@ class Profile(BaseHandler):
                     print(self.user_id)
                     print(self.fields)
                     print('-----------------------------')
-                    user_info = col_users.find_one({'_id':ObjectId(self.user_id)}, fields)
+                    user_info = col_users.find_one({'_id': ObjectId(self.user_id)}, fields)
                     user_info['id'] = str(user_info['_id'])
                     del user_info['_id']
                     col_tasks = db()['tasks']
@@ -220,14 +220,14 @@ class Profile(BaseHandler):
                             item['from_date'] = str(item['from_date'])
                         if 'to_date' in item:
                             item['to_date'] = str(item['to_date'])
-                        item['id'] = item['_id']
+                        item['id'] = str(item['_id'])
                         del item['_id']
                         print(item)
                         user_tasks.append(item)
                     user_people = []
                     col_people = db()['people']
                     for item in col_people.find({'user_id':{'$in':[self.user_id]}}):
-                        item['id'] = item['_id']
+                        item['id'] = str(item['_id'])
                         del item['_id']
                         user_people.append(item)
                     self.output['data']['item'] = user_info
