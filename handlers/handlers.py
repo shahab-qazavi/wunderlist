@@ -203,6 +203,10 @@ class Profile(BaseHandler):
                     for item in self.fields:
                         fields[item] = 1
                     col_users = db()['users']
+                    print('-----------------------------')
+                    print(self.user_id)
+                    print(self.fields)
+                    print('-----------------------------')
                     user_info = col_users.find_one({'_id':ObjectId(self.user_id)}, fields)
                     user_info['id'] = str(user_info['_id'])
                     del user_info['_id']
