@@ -213,6 +213,7 @@ class Profile(BaseHandler):
                     col_tasks = db()['tasks']
                     user_tasks = []
                     for item in col_tasks.find({'user_id':self.user_id}):
+                        print(item)
                         if 'from_date' in item:
                             item['from_date'] = str(item['from_date'])
                         if 'to_date' in item:
