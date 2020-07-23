@@ -219,14 +219,14 @@ class Profile(BaseHandler):
                     for item in col_tasks.find({'user_id': {'$in': [self.user_id]}}):
                         del item['last_update']
                         del item['create_date']
-
+                        del item['user_id']
                         # item['create_date'] = str(item['create_date'])
                         # item['last_update'] = str(item['last_update'])
                         if 'from_date' in item:
                             item['from_date'] = str(item['from_date'])
                         if 'to_date' in item:
                             item['to_date'] = str(item['to_date'])
-                        # item['id'] = str(item['_id'])
+                        item['id'] = str(item['_id'])
                         del item['_id']
                         user_tasks.append(item)
                     user_people = []
