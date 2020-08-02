@@ -272,13 +272,20 @@ class Profile(BaseHandler):
                         if 'family' in self.params: doc['people.family'] = self.params['family']
                         if 'pic' in self.params: doc['people.pic'] = self.params['pic']
                         col_tasks.update({'people.id': self.user_id}, {'$set': doc}, multi=True)
-                        col_people.update({'user_id': self.user_id}, {'$set': {
-                            'name': self.params['name'],
-                            'pic': self.params['pic']
-                        }}, multi=True)
+                        changes = {}
+
+                        if 'name' in self.params and 'pic' not in self.params:
+                            changes['$set'] = {'name':self.params['name']}
+                        elif 'pic' in self.params and 'name' not in self.params:
+                            changes['$set'] = {'pic':self.params['pic']}
+                        elif 'pic' in self.params and 'name' in self.params:
+                            changes['$set'] = {'name': self.params['name'], 'pic':self.params['pic']}
+
+                        col_people.update({'user_id': self.user_id}, changes, multi=True)
                 else:
                     self.set_output('tasks', 'wrong_params')
                     return False
+            self.set_output('public_operations', 'successful')
         except:
             PrintException()
             self.set_output('public_operations', 'failed')
@@ -370,7 +377,7 @@ class Tasks(BaseHandler):
 
     def before_post(self):
         inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
-                  'location', 'remind', 'people', 'user_id', 'is_done', 'is_favorite']
+                  'location', 'remind', 'people', 'user_id', 'is_done', 'is_favorite','task_figure']
         count = 0
         for item in self.params:
             if item not in inputs:
@@ -390,6 +397,7 @@ class Tasks(BaseHandler):
 
                 self.params['is_done'] = False
                 self.params['is_favorite'] = False
+                self.params['task_figure'] = 'line' if 'task_figure' not in self.params else self.params['task_figure']
             except:
                 PrintException()
                 return False
@@ -544,7 +552,6 @@ class Dashboard(BaseHandler):
             results = {}
             col_tasks = db()['tasks']
             for items in queries:
-
                 result_list = []
                 for item in col_tasks.find(queries[items]):
                     item['id'] = str(item['_id'])
@@ -568,7 +575,7 @@ class Dashboard(BaseHandler):
 
 class DeleteUser(BaseHandler):
     def init_method(self):
-        self.tokenless = True
+        # self.tokenless = True
         self.inputs = {
             'post': ['mobile']
         }
