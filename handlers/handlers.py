@@ -236,7 +236,7 @@ class Profile(BaseHandler):
                         del item['_id']
                         user_people.append(item)
                     self.output['data']['item'] = user_info
-                    self.output['data']['item']['tasks'] = user_tasks
+                    # self.output['data']['item']['tasks'] = user_tasks
                     self.output['data']['item']['people'] = user_people
                     self.set_output('public_operations', 'successful')
                 except:
