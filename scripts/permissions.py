@@ -21,6 +21,7 @@ col_users_roles.insert_many([
         'permissions': {
             'allow': ['get', 'put'],
             'get': {'user_id': '$uid'},
+            'delete': {'user_id': '$uid'},
             'put': {
                 'query': {'user_id': '$uid'},
                 'set': {}
@@ -85,6 +86,15 @@ col_users_roles.insert_many([
                 'set': {}
 
             },
+            'delete': {'user_id': '$uid'}
+
+        },
+    },
+    {
+        'name': 'user',
+        'module': 'delete_account',
+        'permissions': {
+            'allow': ['delete'],
             'delete': {'user_id': '$uid'}
 
         },

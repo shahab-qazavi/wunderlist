@@ -1,6 +1,5 @@
 from handlers.handlers import Register, ActiveAccount, Profile, Login, ResetPassword, ForgotPassword,\
-    People, Tasks, Dashboard, SaveTaskQuery
-
+    People, Tasks, Dashboard, SaveTaskQuery, DeleteUser
 
 
 url_patterns = [
@@ -14,5 +13,6 @@ url_patterns = [
     ("/v1/people/?([^/]+)?", People, None, "people_v1"),
     ("/v1/dashboard/?([^/]+)?", Dashboard, None, "dashboard_v1"),
     ("/v1/save_task_query/?([^/]+)?", SaveTaskQuery, None, "save_task_query_v1"),
+    # ("/v1/delete_account/?([^/]+)?", DeleteUser, None, "delete_account_v1"),
 
 ]

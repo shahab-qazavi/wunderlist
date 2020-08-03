@@ -18,7 +18,7 @@ class Register(BaseHandler):
             'post': ['mobile', 'password', 'name', 'family']
         }
         self.inputs = {
-            'post': ['mobile', 'password', 'name', 'family', 'email', 'device_info', 'pic']
+            'post': ['mobile', 'password', 'name', 'family', 'email', 'device_info', 'pic', 'tasks_figure']
         }
 
     def before_post(self):
@@ -39,6 +39,7 @@ class Register(BaseHandler):
             self.params['activation_code'] = random_digits()
             self.params['confirmed'] = False
             self.params['role'] = 'user'
+            self.params['tasks_figure'] = 'line' if 'tasks_figure' not in self.params else self.params['tasks_figure']
             self.params['password_pure'] = self.params['password']
             self.params['password'] = create_md5(self.params['password'])
             # .encode('utf-8')
@@ -188,10 +189,29 @@ class Profile(BaseHandler):
         self.inputs = {
             'put': ['name', 'family', 'email', 'password', 'pic', 'nav_color', 'background_color']
         }
+        self.inputs = {
+            'delete': ['id', 'mobile', 'password']
+        }
+        self.required = {
+            'delete': ['id', 'mobile', 'password']
+        }
 
     def before_get(self):
         self.module = 'users'
         return True
+
+    def before_delete(self):
+        try:
+            self.method = 'users'
+            print(self.params['mobile'])
+            print(self.user_id)
+            col_users = db()['users']
+            col_users.delete_one({'_id': ObjectId(self.params['id']), 'mobile': self.params['mobile'],
+                                  'password': create_md5(self.params['password'])})
+            self.set_output('public_operations', 'successful')
+        except:
+            PrintException()
+        self.allow_action = False
 
     def get(self, id=None, *args, **kwargs):
         self.Print('%s fired' % inspect.stack()[0][3], Colors.GRAY)
@@ -369,18 +389,16 @@ class Tasks(BaseHandler):
         }
         self.inputs = {
             'post': ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
-                     'location', 'remind', 'people']
+                  'location', 'remind', 'people', 'user_id', 'is_done', 'is_favorite','task_figure']
         }
         self.casting['booleans'] = ['remind','is_done', 'favorite']
         self.casting['dates'] = ['from_date', 'to_date']
         self.casting['lists'] = ['tags', 'people', 'attachment']
 
     def before_post(self):
-        inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
-                  'location', 'remind', 'people', 'user_id', 'is_done', 'is_favorite','task_figure']
         count = 0
         for item in self.params:
-            if item not in inputs:
+            if item not in self.inputs['post']:
                 count += 1
         print(self.params)
         if count == 0:
@@ -397,7 +415,7 @@ class Tasks(BaseHandler):
 
                 self.params['is_done'] = False
                 self.params['is_favorite'] = False
-                self.params['task_figure'] = 'line' if 'task_figure' not in self.params else self.params['task_figure']
+
             except:
                 PrintException()
                 return False
@@ -485,10 +503,10 @@ class Tasks(BaseHandler):
 class People(BaseHandler):
     def init_method(self):
         self.required = {
-            'post': ['name', 'pic', 'id']
+            'post': ['name', 'pic', 'mobile']
         }
         self.inputs = {
-            'post': ['name', 'pic', 'id']
+            'post': ['name', 'pic', 'mobile']
         }
 
 
@@ -575,21 +593,21 @@ class Dashboard(BaseHandler):
 
 class DeleteUser(BaseHandler):
     def init_method(self):
-        # self.tokenless = True
         self.inputs = {
-            'post': ['mobile']
+            'delete': ['id','mobile','password']
         }
         self.required = {
-            'post': ['mobile']
+            'delete': ['id','mobile','password']
         }
 
-    def before_post(self):
+    def before_delete(self):
         try:
             self.method = 'users'
             print(self.params['mobile'])
-            print(type(self.params['mobile']))
+            print(self.user_id)
             col_users = db()['users']
-            col_users.delete_one({'mobile': self.params['mobile']})
+            col_users.delete_one({'_id': ObjectId(self.params['id']),'mobile':self.params['mobile'],
+                                  'password':create_md5(self.params['password'])})
             self.set_output('public_operations', 'successful')
         except:
             PrintException()
