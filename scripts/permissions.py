@@ -90,15 +90,7 @@ col_users_roles.insert_many([
 
         },
     },
-    {
-        'name': 'user',
-        'module': 'delete_account',
-        'permissions': {
-            'allow': ['delete'],
-            'delete': {'user_id': '$uid'}
 
-        },
-    },
 
 
 
