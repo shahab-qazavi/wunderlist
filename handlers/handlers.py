@@ -535,9 +535,6 @@ class People(BaseHandler):
         return True
 
 
-
-
-
 class SaveTaskQuery(BaseHandler):
     def init_method(self):
         self.required = {
