@@ -521,6 +521,8 @@ class People(BaseHandler):
                 del item['last_update']
                 del item['user_id']
                 people.append(item)
+            print('------------------------')
+            print(people)
             self.output['data']['list'] = people
             self.set_output('public_operations', 'successful')
 
