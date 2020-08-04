@@ -254,6 +254,9 @@ class Profile(BaseHandler):
                     for item in col_people.find({'user_id': {'$in': [self.user_id]}}):
                         item['id'] = str(item['_id'])
                         del item['_id']
+                        del item['create_date']
+                        del item['last_update']
+                        del item['user_id']
                         user_people.append(item)
                     self.output['data']['item'] = user_info
                     # self.output['data']['item']['tasks'] = user_tasks
