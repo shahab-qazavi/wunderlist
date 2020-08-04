@@ -525,10 +525,10 @@ class People(BaseHandler):
             print(people)
             self.output['data']['list'] = people
             self.set_output('public_operations', 'successful')
-
         except:
             PrintException()
             return False
+        self.allow_action = False
         return True
 
 
