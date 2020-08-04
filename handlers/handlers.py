@@ -517,15 +517,15 @@ class People(BaseHandler):
             col_people = db()['people']
             people = []
             for item in col_people.find({'user_id': self.user_id}).sort('create_date', -1):
-                print(item)
+                # print(item)
                 item['id'] = str(item['_id'])
                 del item['_id']
                 del item['create_date']
                 del item['last_update']
                 del item['user_id']
                 people.append(item)
-            print('------------------------')
-            print(people)
+            # print('------------------------')
+            # print(people)
             self.output['data']['list'] = people
             self.set_output('public_operations', 'successful')
         except:
