@@ -272,7 +272,7 @@ class Profile(BaseHandler):
             self.method = 'put'
             self.module = 'users'
             if self.pre_put():
-                inputs = ['name', 'family', 'email', 'password', 'pic', 'nav_color', 'background_color']
+                inputs = ['name', 'family', 'email', 'password', 'pic', 'nav_color', 'background_color', 'tasks_figure']
                 count = 0
                 for item in self.params:
                     if item not in inputs:
