@@ -236,19 +236,19 @@ class Profile(BaseHandler):
                     del user_info['_id']
                     col_tasks = db()['tasks']
                     user_tasks = []
-                    for item in col_tasks.find({'user_id': {'$in': [self.user_id]}}):
-                        del item['last_update']
-                        del item['create_date']
-                        del item['user_id']
-                        # item['create_date'] = str(item['create_date'])
-                        # item['last_update'] = str(item['last_update'])
-                        if 'from_date' in item:
-                            item['from_date'] = str(item['from_date'])
-                        if 'to_date' in item:
-                            item['to_date'] = str(item['to_date'])
-                        item['id'] = str(item['_id'])
-                        del item['_id']
-                        user_tasks.append(item)
+                    # for item in col_tasks.find({'user_id': {'$in': [self.user_id]}}):
+                    #     del item['last_update']
+                    #     del item['create_date']
+                    #     del item['user_id']
+                    #     # item['create_date'] = str(item['create_date'])
+                    #     # item['last_update'] = str(item['last_update'])
+                    #     if 'from_date' in item:
+                    #         item['from_date'] = str(item['from_date'])
+                    #     if 'to_date' in item:
+                    #         item['to_date'] = str(item['to_date'])
+                    #     item['id'] = str(item['_id'])
+                    #     del item['_id']
+                    #     user_tasks.append(item)
                     user_people = []
                     col_people = db()['people']
                     for item in col_people.find({'user_id': {'$in': [self.user_id]}}):
@@ -508,6 +508,28 @@ class People(BaseHandler):
         self.inputs = {
             'post': ['name', 'pic', 'mobile']
         }
+
+    def before_get(self):
+        try:
+            col_people = db()['people']
+            people = []
+            for item in col_people.find({'user_id':self.user_id}):
+                item['id'] = str(item['_id'])
+                del item['_id']
+                del item['create_date']
+                del item['last_update']
+                del item['user_id']
+                people.append(item)
+            self.output['data']['list'] = people
+            self.set_output('public_operations', 'successful')
+
+        except:
+            PrintException()
+            return False
+        return True
+
+
+
 
 
 class SaveTaskQuery(BaseHandler):
