@@ -513,7 +513,8 @@ class People(BaseHandler):
         try:
             col_people = db()['people']
             people = []
-            for item in col_people.find({'user_id':self.user_id}):
+            for item in col_people.find({'user_id': self.user_id}):
+                print(item)
                 item['id'] = str(item['_id'])
                 del item['_id']
                 del item['create_date']
