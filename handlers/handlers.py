@@ -260,7 +260,7 @@ class Profile(BaseHandler):
                         user_people.append(item)
                     self.output['data']['item'] = user_info
                     # self.output['data']['item']['tasks'] = user_tasks
-                    self.output['data']['item']['people'] = user_people
+                    # self.output['data']['item']['people'] = user_people
                     self.set_output('public_operations', 'successful')
                 except:
                     PrintException()
@@ -399,33 +399,29 @@ class Tasks(BaseHandler):
         self.casting['lists'] = ['tags', 'people', 'attachment']
 
     def before_post(self):
-        count = 0
         for item in self.params:
             if item not in self.inputs['post']:
-                count += 1
-        print(self.params)
-        if count == 0:
-            try:
-                if 'from_date' in self.params and 'to_date' in self.params:
-                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
-                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
-
-                elif 'from_date' in self.params and 'to_date' not in self.params:
-                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
-
-                elif 'to_date' in self.params and 'from_date' not in self.params:
-                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
-
-                self.params['is_done'] = False
-                self.params['is_favorite'] = False
-
-            except:
-                PrintException()
+                self.set_output('tasks', 'wrong_params')
                 return False
-            return True
-        else:
-            self.set_output('tasks', 'wrong_params')
+        print(self.params)
+        try:
+            if 'from_date' in self.params and 'to_date' in self.params:
+                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
+                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+
+            elif 'from_date' in self.params and 'to_date' not in self.params:
+                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
+
+            elif 'to_date' in self.params and 'from_date' not in self.params:
+                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+
+            self.params['is_done'] = False
+            self.params['is_favorite'] = False
+
+        except:
+            PrintException()
             return False
+        return True
 
     def before_get(self):
         try:
@@ -477,26 +473,24 @@ class Tasks(BaseHandler):
 
     def before_put(self):
         try:
-            inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
-                  'location', 'remind', 'people', 'is_done', 'is_favorite','id']
+            inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment', 'location',
+                      'remind', 'people', 'is_done', 'is_favorite', 'id']
             print(self.params)
-            count = 0
             for item in self.params:
                 if item not in inputs:
-                    count += 1
-            if count == 0:
-                if 'from_date' in self.params and 'to_date' in self.params:
-                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
-                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+                    self.set_output('tasks', 'wrong_params')
+                    return False
+            if 'from_date' in self.params and 'to_date' in self.params:
+                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
+                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
 
-                elif 'from_date' in self.params and 'to_date' not in self.params:
-                    self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
+            elif 'from_date' in self.params and 'to_date' not in self.params:
+                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
 
-                elif 'to_date' in self.params and 'from_date' not in self.params:
-                    self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
-            else:
-                self.set_output('tasks', 'wrong_params')
-                return False
+            elif 'to_date' in self.params and 'from_date' not in self.params:
+                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+
+
         except:
             PrintException()
             return False
@@ -514,25 +508,25 @@ class People(BaseHandler):
 
     def before_get(self):
         try:
-            col_people = db()['people']
-            people = []
-            for item in col_people.find({'user_id': self.user_id}).sort('create_date', -1):
-                # print(item)
+            self.sort = ('create_date', -1)
+        except:
+            PrintException()
+            return False
+        return True
+
+    def after_get(self, dataset):
+        temp = []
+        try:
+            for item in dataset:
                 item['id'] = str(item['_id'])
                 del item['_id']
                 del item['create_date']
                 del item['last_update']
                 del item['user_id']
-                people.append(item)
-            # print('------------------------')
-            # print(people)
-            self.output['data']['list'] = people
-            self.set_output('public_operations', 'successful')
+                temp.append(item)
         except:
             PrintException()
-            return False
-        self.allow_action = False
-        return True
+        return temp
 
 
 class SaveTaskQuery(BaseHandler):
@@ -586,7 +580,6 @@ class Dashboard(BaseHandler):
                                     query[item['type_date']] = {
                                         '$gte': date_now + timedelta(
                                             days=item['amount'])}
-
                 elif 'time' in item and item['time'] == 'now':
                     # date = item['type_date'] if 'type_date' in item else 'to_date'
                     query['$and'] = [{'from_date': {'$lte': date_now}}, {'to_date': {'$gte': date_now}}]
