@@ -517,6 +517,7 @@ class People(BaseHandler):
     def after_get(self, dataset):
         temp = []
         try:
+            print('raft tooooosh')
             for item in dataset:
                 item['id'] = str(item['_id'])
                 del item['_id']
