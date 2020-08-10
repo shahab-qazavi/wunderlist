@@ -506,13 +506,13 @@ class People(BaseHandler):
             'post': ['name', 'pic', 'mobile']
         }
 
-    # def before_get(self):
-    #     try:
-    #         self.sort = ('create_date', -1)
-    #     except:
-    #         PrintException()
-    #         return False
-    #     return True
+    def before_get(self):
+        try:
+            self.sort = {'create_date': -1}
+        except:
+            PrintException()
+            return False
+        return True
 
     def after_get(self, dataset):
         temp = []
