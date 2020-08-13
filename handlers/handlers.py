@@ -591,7 +591,7 @@ class Dashboard(BaseHandler):
                     query['$and'] = [{'from_date': {'$lte': date_now}}, {'to_date': {'$gte': date_now}}]
                 queries[item['name']] = query
             print(queries)
-            results = {}
+            results = []
             col_tasks = db()['tasks']
             for items in queries:
                 # print(items)
@@ -609,7 +609,7 @@ class Dashboard(BaseHandler):
                     if 'to_date' in item:
                         item['to_date'] = str(item['to_date'])
                     result_list.append(item)
-                results[items] = result_list
+                results.append({items:result_list})
             self.set_output('public_operations', 'successful')
             self.output['data']['list'] = results
         except:
