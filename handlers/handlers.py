@@ -593,6 +593,8 @@ class Dashboard(BaseHandler):
             results = {}
             col_tasks = db()['tasks']
             for items in queries:
+                print(items)
+                print(queries[items])
                 result_list = []
                 for item in col_tasks.find(queries[items]):
                     item['id'] = str(item['_id'])
