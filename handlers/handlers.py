@@ -547,9 +547,9 @@ class Dashboard(BaseHandler):
             date_now = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
             queries = {}
             col_saved_tasks = db()['save_task_query']
-            print('--------------------------')
-            print(self.user_id)
-            print('--------------------------')
+            # print('--------------------------')
+            # print(self.user_id)
+            # print('--------------------------')
             for item in col_saved_tasks.find({'user_id': self.user_id}):
                 query = {}
                 query['user_id'] = self.user_id
@@ -594,8 +594,8 @@ class Dashboard(BaseHandler):
             results = {}
             col_tasks = db()['tasks']
             for items in queries:
-                print(items)
-                print(queries[items])
+                # print(items)
+                # print(queries[items])
                 result_list = []
                 for item in col_tasks.find(queries[items]):
                     item['id'] = str(item['_id'])
