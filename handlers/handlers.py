@@ -551,17 +551,17 @@ class Dashboard(BaseHandler):
             # print(self.user_id)
             # print('--------------------------')
             for item in col_saved_tasks.find({'user_id': self.user_id}):
-                date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")\
-                    if 'from' in item and item['from'] == 'now'\
-                    else datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S")
+                # date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")\
+                #     if 'from' in item and item['from'] == 'now'\
+                #     else datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S")
                 query = {}
                 query['user_id'] = self.user_id
                 if 'tags' in item:
                     query['tags'] = {'$in': item['tags']}
-                # if 'from' in item and item['from'] == 'now':
-                #     date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
-                # elif 'from' in item and item['from'] != 'now':
-                #     date_point = datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S")
+                if 'from' in item and item['from'] == 'now':
+                    date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
+                elif 'from' in item and item['from'] != 'now':
+                    date_point = datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S")
                     # print(item)
                 # if 'type_date' in item and item['type_date'] == 'to_date':
                 #     # print('injaaaaaa')
