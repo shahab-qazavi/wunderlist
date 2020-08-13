@@ -547,6 +547,9 @@ class Dashboard(BaseHandler):
             date_now = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
             queries = {}
             col_saved_tasks = db()['save_task_query']
+            print('--------------------------')
+            print(self.user_id)
+            print('--------------------------')
             for item in col_saved_tasks.find({'user_id': self.user_id}):
                 query = {}
                 if 'tags' in item:
