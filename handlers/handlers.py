@@ -552,6 +552,7 @@ class Dashboard(BaseHandler):
             print('--------------------------')
             for item in col_saved_tasks.find({'user_id': self.user_id}):
                 query = {}
+                query['user_id'] = self.user_id
                 if 'tags' in item:
                     query['tags'] = {'$in': item['tags']}
                 if 'from' in item and item['from'] == 'now':
