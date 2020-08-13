@@ -543,7 +543,7 @@ class SaveTaskQuery(BaseHandler):
 class Dashboard(BaseHandler):
     def before_get(self):
         try:
-            date_now = datetime.strptime(str(datetime.now())[:10], "%Y-%m-%d %H:%M:%S")
+            date_now = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
 
             queries = {}
             col_saved_tasks = db()['save_task_query']
