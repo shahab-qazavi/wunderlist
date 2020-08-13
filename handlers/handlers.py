@@ -556,7 +556,7 @@ class Dashboard(BaseHandler):
                 #     else datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S")
                 query = {}
                 query['user_id'] = self.user_id
-                if 'tags' in item:
+                if 'tags' in item and item['tags'] != []:
                     query['tags'] = {'$in': item['tags']}
                 if 'from' in item and item['from'] == 'now':
                     date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
