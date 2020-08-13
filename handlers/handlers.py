@@ -571,17 +571,25 @@ class Dashboard(BaseHandler):
                 #     query[item['type_date']] = date_point - timedelta(
                 #         days=item['amount'])
                 if 'time' in item and item['time'] != 'now':
-                    if 'type_date' in item:
-                        # if 'from' in item and item['from'] != 'now':
-                        if 'amount' in item:
+                    if 'time_point' in item and item['time_point'] == 'after':
+                        if 'type_date' in item and 'amount' in item:
+                            # if 'from' in item and item['from'] != 'now':
                             if item['time'] == 'pass':
-                                query[item['type_date']] = {
-                                    '$lte': date_point - timedelta(
-                                        days=item['amount'])}
+                                query[item['type_date']] = {'$lte': date_point - timedelta(days=item['amount'])}
                             elif item['time'] == 'future':
-                                query[item['type_date']] = {
-                                    '$gte': date_point + timedelta(
-                                        days=item['amount'])}
+                                query[item['type_date']] = {'$gte': date_point + timedelta(days=item['amount'])}
+                    elif 'time_point' in item and item['time_point'] == 'in':
+                        if item['time'] == 'pass':
+                            query[item['type_date']] = date_point - timedelta(days=item['amount'])
+                        elif item['time'] == 'future':
+                            query[item['type_date']] = date_point + timedelta(days=item['amount'])
+                    elif 'time_point' in item and item['time_point'] == 'to':
+                        if item['time'] == 'pass':
+                            query[item['type_date']] =\
+                                {'$gte': date_point, '$lte': date_point - timedelta(days=item['amount'])}
+                        elif item['time'] == 'future':
+                            query[item['type_date']] =\
+                                {'$gte': date_point, '$lte': date_point + timedelta(days=item['amount'])}
                         # elif 'from' not in item:
                         #     if 'amount' in item and 'time' in item:
                         #         if item['time'] == 'pass':
