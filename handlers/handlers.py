@@ -447,7 +447,6 @@ class Tasks(BaseHandler):
                     del user_task['last_update']
                     del user_task['user_id']
                     tasks.append(user_task)
-                # tasks = sorted(tasks, reverse=True)
                 self.output['data']['list'] = tasks
             self.set_output('public_operations', 'successful')
         except:
@@ -533,10 +532,10 @@ class People(BaseHandler):
 class SaveTaskQuery(BaseHandler):
     def init_method(self):
         self.required = {
-            'post': ['name']
+            'post': ['name', 'time_point']
         }
         self.inputs = {
-            'post': ['tags', 'amount', 'time', 'from', 'type_date', 'name']
+            'post': ['tags', 'amount', 'time', 'from', 'type_date', 'name', 'time_point']
         }
 
 
@@ -547,33 +546,20 @@ class Dashboard(BaseHandler):
 
             queries = {}
             col_saved_tasks = db()['save_task_query']
-            # print('--------------------------')
-            # print(self.user_id)
-            # print('--------------------------')
             for item in col_saved_tasks.find({'user_id': self.user_id}):
-                # date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")\
-                #     if 'from' in item and item['from'] == 'now'\
-                #     else datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S")
                 query = {}
                 query['user_id'] = self.user_id
                 if 'tags' in item and item['tags'] != []:
                     query['tags'] = {'$in': item['tags']}
+
                 if 'from' in item and item['from'] == 'now':
                     date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
                 elif 'from' in item and item['from'] != 'now':
                     date_point = datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S")
-                    # print(item)
-                # if 'type_date' in item and item['type_date'] == 'to_date':
-                #     # print('injaaaaaa')
-                #     query[item['type_date']] = date_point + timedelta(
-                #         days=item['amount'])
-                # elif 'type_date' in item and item['type_date'] == 'from_date':
-                #     query[item['type_date']] = date_point - timedelta(
-                #         days=item['amount'])
+
                 if 'time' in item and item['time'] != 'now':
                     if 'time_point' in item and item['time_point'] == 'after':
                         if 'type_date' in item and 'amount' in item:
-                            # if 'from' in item and item['from'] != 'now':
                             if item['time'] == 'pass':
                                 query[item['type_date']] = {'$lte': date_point - timedelta(days=item['amount'])}
                             elif item['time'] == 'future':
@@ -590,26 +576,14 @@ class Dashboard(BaseHandler):
                         elif item['time'] == 'future':
                             query[item['type_date']] =\
                                 {'$gte': date_point, '$lte': date_point + timedelta(days=item['amount'])}
-                        # elif 'from' not in item:
-                        #     if 'amount' in item and 'time' in item:
-                        #         if item['time'] == 'pass':
-                        #             query[item['type_date']] = {
-                        #                 '$lte': date_point - timedelta(
-                        #                     days=item['amount'])}
-                        #         elif item['time'] == 'future':
-                        #             query[item['type_date']] = {
-                        #                 '$gte': date_point + timedelta(
-                        #                     days=item['amount'])}
+
                 elif 'time' in item and item['time'] == 'now':
-                    # date = item['type_date'] if 'type_date' in item else 'to_date'
                     query['$and'] = [{'from_date': {'$lte': date_now}}, {'to_date': {'$gte': date_now}}]
                 queries[item['name']] = query
             print(queries)
             results = []
             col_tasks = db()['tasks']
             for items in queries:
-                # print(items)
-                # print(queries[items])
                 result_list = []
                 for item in col_tasks.find(queries[items]):
                     item['id'] = str(item['_id'])
