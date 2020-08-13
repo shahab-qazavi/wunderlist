@@ -543,49 +543,55 @@ class SaveTaskQuery(BaseHandler):
 class Dashboard(BaseHandler):
     def before_get(self):
         try:
-            # date_now = datetime.strptime(str(datetime.now())[:10], "%Y-%m-%d %H:%M:%S")
-            date_now = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
+            date_now = datetime.strptime(str(datetime.now())[:10], "%Y-%m-%d %H:%M:%S")
+
             queries = {}
             col_saved_tasks = db()['save_task_query']
             # print('--------------------------')
             # print(self.user_id)
             # print('--------------------------')
             for item in col_saved_tasks.find({'user_id': self.user_id}):
+                date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")\
+                    if 'from' in item and item['from'] == 'now'\
+                    else datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S")
                 query = {}
                 query['user_id'] = self.user_id
                 if 'tags' in item:
                     query['tags'] = {'$in': item['tags']}
-                if 'from' in item and item['from'] == 'now':
-                    print(item)
-                    if 'type_date' in item and item['type_date'] == 'to_date':
-                        print('injaaaaaa')
-                        query[item['type_date']] = date_now + timedelta(
-                            days=item['amount'])
-                    elif 'type_date' in item and item['type_date'] == 'from_date':
-                        query[item['type_date']] = date_now - timedelta(
-                            days=item['amount'])
+                # if 'from' in item and item['from'] == 'now':
+                #     date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
+                # elif 'from' in item and item['from'] != 'now':
+                #     date_point = datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S")
+                    # print(item)
+                # if 'type_date' in item and item['type_date'] == 'to_date':
+                #     # print('injaaaaaa')
+                #     query[item['type_date']] = date_point + timedelta(
+                #         days=item['amount'])
+                # elif 'type_date' in item and item['type_date'] == 'from_date':
+                #     query[item['type_date']] = date_point - timedelta(
+                #         days=item['amount'])
                 if 'time' in item and item['time'] != 'now':
                     if 'type_date' in item:
-                        if 'from' in item and item['from'] != 'now':
-                            if 'amount' in item:
-                                if item['time'] == 'pass':
-                                    query[item['type_date']] = {
-                                        '$lte': datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S") - timedelta(
-                                            days=item['amount'])}
-                                elif item['time'] == 'future':
-                                    query[item['type_date']] = {
-                                        '$gte': datetime.strptime(item['from'], "%Y-%m-%d %H:%M:%S") + timedelta(
-                                            days=item['amount'])}
-                        elif 'from' not in item:
-                            if 'amount' in item and 'time' in item:
-                                if item['time'] == 'pass':
-                                    query[item['type_date']] = {
-                                        '$lte': date_now - timedelta(
-                                            days=item['amount'])}
-                                elif item['time'] == 'future':
-                                    query[item['type_date']] = {
-                                        '$gte': date_now + timedelta(
-                                            days=item['amount'])}
+                        # if 'from' in item and item['from'] != 'now':
+                        if 'amount' in item:
+                            if item['time'] == 'pass':
+                                query[item['type_date']] = {
+                                    '$lte': date_point - timedelta(
+                                        days=item['amount'])}
+                            elif item['time'] == 'future':
+                                query[item['type_date']] = {
+                                    '$gte': date_point + timedelta(
+                                        days=item['amount'])}
+                        # elif 'from' not in item:
+                        #     if 'amount' in item and 'time' in item:
+                        #         if item['time'] == 'pass':
+                        #             query[item['type_date']] = {
+                        #                 '$lte': date_point - timedelta(
+                        #                     days=item['amount'])}
+                        #         elif item['time'] == 'future':
+                        #             query[item['type_date']] = {
+                        #                 '$gte': date_point + timedelta(
+                        #                     days=item['amount'])}
                 elif 'time' in item and item['time'] == 'now':
                     # date = item['type_date'] if 'type_date' in item else 'to_date'
                     query['$and'] = [{'from_date': {'$lte': date_now}}, {'to_date': {'$gte': date_now}}]
