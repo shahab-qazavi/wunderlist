@@ -532,7 +532,7 @@ class People(BaseHandler):
 class SaveTaskQuery(BaseHandler):
     def init_method(self):
         self.required = {
-            'post': ['name', 'time_point']
+            'post': ['name']
         }
         self.inputs = {
             'post': ['tags', 'amount', 'time', 'from', 'type_date', 'name', 'time_point']
@@ -542,6 +542,9 @@ class SaveTaskQuery(BaseHandler):
 class Dashboard(BaseHandler):
     def before_get(self):
         try:
+            for item in self.params:
+                if item not in self.inputs:
+                    return False
             date_now = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
 
             queries = {}
