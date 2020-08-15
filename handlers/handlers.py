@@ -541,7 +541,7 @@ class SaveTaskQuery(BaseHandler):
     def before_get(self):
         try:
             print(self.params)
-            if self.params.get('id') == 'id':
+            if 'id' in self.params:
                 self.conditions['_id'] = ObjectId(self.params['id'])
         except:
             PrintException()
