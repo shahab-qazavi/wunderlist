@@ -540,6 +540,7 @@ class SaveTaskQuery(BaseHandler):
 
     def before_get(self):
         try:
+            print(self.params)
             if self.params.get('id') == 'id':
                 self.conditions['_id'] = ObjectId(self.params['id'])
         except:
@@ -557,6 +558,7 @@ class SaveTaskQuery(BaseHandler):
             PrintException()
             return False
         return True
+
 
 class Dashboard(BaseHandler):
     def before_get(self):
