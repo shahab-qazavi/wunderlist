@@ -592,13 +592,17 @@ class Dashboard(BaseHandler):
 
                 elif 'time' in item and item['time'] == 'now':
                     query['$and'] = [{'from_date': {'$lte': date_now}}, {'to_date': {'$gte': date_now}}]
-                queries['id'] = str(item['_id'])
-                queries[item['name']] = query
+                # queries['id'] = str(item['_id'])
+                # queries[item['name']] = query
+                queries = {'id':str(item['_id']),
+                           'name':item['name'],
+                           'query':query}
 
             print(queries)
             results = []
             col_tasks = db()['tasks']
             for items in queries:
+                print(items)
                 result_list = []
                 for item in col_tasks.find(queries[items]):
                     item['id'] = str(item['_id'])
