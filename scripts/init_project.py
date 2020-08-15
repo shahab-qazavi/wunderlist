@@ -206,6 +206,13 @@ def insert_messages():
             'code': 401,
             'status': False,
             'en': 'Wrong Params'
+        },
+        {
+            'group': 'save_task',
+            'name': 'duplicate_name',
+            'code': 401,
+            'status': False,
+            'en': 'Duplicate Query name!'
         }
     ])
 

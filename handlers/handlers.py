@@ -538,6 +538,16 @@ class SaveTaskQuery(BaseHandler):
             'post': ['tags', 'amount', 'time', 'from', 'type_date', 'name', 'time_point']
         }
 
+    def before_post(self):
+        try:
+            col_save_task = db()['save_task_query']
+            if col_save_task.count_documents({'name': self.params['name']}) > 0:
+                self.set_output('save_task', 'duplicate_name')
+                return False
+        except:
+            PrintException()
+            return False
+        return True
 
 class Dashboard(BaseHandler):
     def before_get(self):
@@ -582,7 +592,9 @@ class Dashboard(BaseHandler):
 
                 elif 'time' in item and item['time'] == 'now':
                     query['$and'] = [{'from_date': {'$lte': date_now}}, {'to_date': {'$gte': date_now}}]
+                queries['id'] = str(item['_id'])
                 queries[item['name']] = query
+
             print(queries)
             results = []
             col_tasks = db()['tasks']
@@ -600,7 +612,8 @@ class Dashboard(BaseHandler):
                     if 'to_date' in item:
                         item['to_date'] = str(item['to_date'])
                     result_list.append(item)
-                results.append({items:result_list})
+                results.append({'name':items,
+                                'tasks':result_list})
             self.set_output('public_operations', 'successful')
             self.output['data']['list'] = results
         except:
