@@ -557,7 +557,7 @@ class Dashboard(BaseHandler):
                     return False
             date_now = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
 
-            queries = {}
+            queries = []
             col_saved_tasks = db()['save_task_query']
             for item in col_saved_tasks.find({'user_id': self.user_id}):
                 query = {}
@@ -594,9 +594,7 @@ class Dashboard(BaseHandler):
                     query['$and'] = [{'from_date': {'$lte': date_now}}, {'to_date': {'$gte': date_now}}]
                 # queries['id'] = str(item['_id'])
                 # queries[item['name']] = query
-                queries = {'id':str(item['_id']),
-                           'name':item['name'],
-                           'query':query}
+                queries.append({'id': str(item['_id']), 'name': item['name'], 'query': query})
 
             print(queries)
             results = []
@@ -604,7 +602,7 @@ class Dashboard(BaseHandler):
             for items in queries:
                 print(items)
                 result_list = []
-                for item in col_tasks.find(queries[items]):
+                for item in col_tasks.find(items['query']):
                     item['id'] = str(item['_id'])
                     del item['_id']
                     if 'create_date' in item:
@@ -616,8 +614,9 @@ class Dashboard(BaseHandler):
                     if 'to_date' in item:
                         item['to_date'] = str(item['to_date'])
                     result_list.append(item)
-                results.append({'name':items,
-                                'tasks':result_list})
+                results.append({'id': items['id'],
+                                'name': items['name'],
+                                'result': result_list})
             self.set_output('public_operations', 'successful')
             self.output['data']['list'] = results
         except:
