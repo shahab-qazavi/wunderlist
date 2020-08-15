@@ -538,6 +538,15 @@ class SaveTaskQuery(BaseHandler):
             'post': ['tags', 'amount', 'time', 'from', 'type_date', 'name', 'time_point']
         }
 
+    def before_get(self):
+        try:
+            if self.params.get('id') == 'id':
+                self.conditions['_id'] = ObjectId(self.params['id'])
+        except:
+            PrintException()
+            return False
+        return True
+
     def before_post(self):
         try:
             col_save_task = db()['save_task_query']

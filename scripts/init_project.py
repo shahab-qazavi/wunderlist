@@ -210,7 +210,7 @@ def insert_messages():
         {
             'group': 'save_task',
             'name': 'duplicate_name',
-            'code': 401,
+            'code': 409,
             'status': False,
             'en': 'Duplicate Query name!'
         }
