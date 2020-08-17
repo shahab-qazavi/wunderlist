@@ -80,6 +80,38 @@ class Register(BaseHandler):
         self.kmwrite()
 
 
+class ResendActivationCode(BaseHandler):
+    def init_method(self):
+        self.required = {
+            'post': ['mobile']
+        }
+        self.tokenless = True
+
+    def before_post(self):
+        try:
+            col_users = db()['users']
+            user = col_users.find_one({'mobile': self.params['mobile']}, {'confirmed': 1, 'mobile': 1, 'activation_code': 1})
+            if user is not None and user['confirmed'] is False:
+                # user['activation_code'] = random_digits() if 'activation_code' not in user\
+                #                                          or user['activation_code'] == '' or\
+                #                                          user['activation_code'] is None else user['activation_code']
+                send_sms(sms['users']['registration_successful'][self.locale] % user['activation_code'].encode('utf-8'),
+                         user['mobile'])
+                self.set_output('user', 'send_sms')
+                return True
+            elif user is None:
+                self.set_output('user', 'user_not_exists')
+                return False
+            elif user is not None and user['confirmed'] is True:
+                self.set_output('user', 'already_active')
+                return False
+            self.allow_action = False
+            return True
+        except:
+            PrintException()
+            return False
+
+
 class ActiveAccount(BaseHandler):
 
     def init_method(self):

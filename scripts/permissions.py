@@ -90,6 +90,14 @@ col_users_roles.insert_many([
 
         },
     },
+    {
+        'name': 'user',
+        'module': 'resend_activation_code',
+        'permissions': {
+            'allow': ['get'],
+            'get': {},
+        },
+    },
 
 
 

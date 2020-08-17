@@ -213,7 +213,21 @@ def insert_messages():
             'code': 409,
             'status': False,
             'en': 'Duplicate Query name!'
-        }
+        },
+        {
+            'group': 'user',
+            'name': 'send_sms',
+            'code': 200,
+            'status': True,
+            'en': 'SMS Has Been sent'
+        },
+        {
+            'group': 'user',
+            'name': 'already_active',
+            'code': 200,
+            'status': True,
+            'en': 'The User is already active'
+        },
     ])
 
 
