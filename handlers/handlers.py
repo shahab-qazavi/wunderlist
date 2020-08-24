@@ -18,7 +18,7 @@ class Register(BaseHandler):
             'post': ['mobile', 'password', 'name', 'family']
         }
         self.inputs = {
-            'post': ['mobile', 'password', 'name', 'family', 'email', 'device_info', 'pic', 'tasks_figure']
+            'post': ['mobile', 'password', 'name', 'family', 'email', 'device_info', 'pic']
         }
 
     def before_post(self):
@@ -39,7 +39,7 @@ class Register(BaseHandler):
             self.params['activation_code'] = random_digits()
             self.params['confirmed'] = False
             self.params['role'] = 'user'
-            self.params['tasks_figure'] = 'line' if 'tasks_figure' not in self.params else self.params['tasks_figure']
+            # self.params['tasks_figure'] = 'line' if 'tasks_figure' not in self.params else self.params['tasks_figure']
             self.params['password_pure'] = self.params['password']
             self.params['password'] = create_md5(self.params['password'])
             # .encode('utf-8')
