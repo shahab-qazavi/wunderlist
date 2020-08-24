@@ -34,7 +34,8 @@ def es():
 
 def db():
     from pymongo import MongoClient
-    con = MongoClient()
+    # con = MongoClient()
+    con = MongoClient('mongodb://mongoc')
     return con[db_name]
 
 
