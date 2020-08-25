@@ -473,8 +473,10 @@ class Tasks(BaseHandler):
                 for user_task in col_tasks.find({'user_id': str(self.user_id)}).sort([('create_date', -1)]):
                     user_task['id'] = str(user_task['_id'])
                     del user_task['_id']
-                    user_task['from_date'] = str(user_task['from_date'])
-                    user_task['to_date'] = str(user_task['to_date'])
+                    if 'from_date' in user_task:
+                        user_task['from_date'] = str(user_task['from_date'])
+                    if 'to_date' in user_task:
+                        user_task['to_date'] = str(user_task['to_date'])
                     del user_task['create_date']
                     del user_task['last_update']
                     del user_task['user_id']
@@ -506,7 +508,7 @@ class Tasks(BaseHandler):
         try:
             inputs = ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment', 'location',
                       'remind', 'people', 'is_done', 'is_favorite', 'id']
-            print(self.params)
+            # print(self.params)
             for item in self.params:
                 if item not in inputs:
                     self.set_output('tasks', 'wrong_params')
@@ -520,7 +522,6 @@ class Tasks(BaseHandler):
 
             elif 'to_date' in self.params and 'from_date' not in self.params:
                 self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
-
 
         except:
             PrintException()
