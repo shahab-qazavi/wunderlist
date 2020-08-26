@@ -219,9 +219,7 @@ class Login(BaseHandler):
 class Profile(BaseHandler):
     def init_method(self):
         self.inputs = {
-            'put': ['name', 'family', 'email', 'password', 'pic', 'nav_color', 'background_color']
-        }
-        self.inputs = {
+            'put': ['name', 'family', 'email', 'password', 'pic', 'nav_color', 'background_color', 'tasks_figure'],
             'delete': ['id', 'mobile', 'password']
         }
         self.required = {
@@ -307,39 +305,37 @@ class Profile(BaseHandler):
             self.method = 'put'
             self.module = 'users'
             if self.pre_put():
-                inputs = ['name', 'family', 'email', 'password', 'pic', 'nav_color', 'background_color', 'tasks_figure']
-                count = 0
+
                 for item in self.params:
-                    if item not in inputs:
-                        count += 1
-                if count == 0:
-                    need_consistency_update = any(x in self.params for x in ['pic', 'name', 'family'])
-                    if 'password' in self.params:
-                        self.params['password'] = create_md5(self.params['password'])
-                        self.params['password_pure'] = self.params['password']
-                    col_users = db()['users']
-                    col_users.update({'_id': ObjectId(self.user_id)}, {'$set': self.params})
-                    if need_consistency_update:
-                        col_people = db()['people']
-                        col_tasks = db()['tasks']
-                        doc = {}
-                        if 'name' in self.params: doc['people.name'] = self.params['name']
-                        if 'family' in self.params: doc['people.family'] = self.params['family']
-                        if 'pic' in self.params: doc['people.pic'] = self.params['pic']
-                        col_tasks.update({'people.id': self.user_id}, {'$set': doc}, multi=True)
-                        changes = {}
+                    if item not in self.inputs['put']:
+                        self.set_output('tasks', 'wrong_params')
+                        return False
 
-                        if 'name' in self.params and 'pic' not in self.params:
-                            changes['$set'] = {'name':self.params['name']}
-                        elif 'pic' in self.params and 'name' not in self.params:
-                            changes['$set'] = {'pic':self.params['pic']}
-                        elif 'pic' in self.params and 'name' in self.params:
-                            changes['$set'] = {'name': self.params['name'], 'pic':self.params['pic']}
+                need_consistency_update = any(x in self.params for x in ['pic', 'name', 'family'])
+                if 'password' in self.params:
+                    self.params['password'] = create_md5(self.params['password'])
+                    self.params['password_pure'] = self.params['password']
+                col_users = db()['users']
+                col_users.update({'_id': ObjectId(self.user_id)}, {'$set': self.params})
+                if need_consistency_update:
+                    col_people = db()['people']
+                    col_tasks = db()['tasks']
+                    doc = {}
+                    if 'name' in self.params: doc['people.name'] = self.params['name']
+                    if 'family' in self.params: doc['people.family'] = self.params['family']
+                    if 'pic' in self.params: doc['people.pic'] = self.params['pic']
+                    col_tasks.update({'people.id': self.user_id}, {'$set': doc}, multi=True)
+                    changes = {}
 
-                        col_people.update({'user_id': self.user_id}, changes, multi=True)
-                else:
-                    self.set_output('tasks', 'wrong_params')
-                    return False
+                    if 'name' in self.params and 'pic' not in self.params:
+                        changes['$set'] = {'name':self.params['name']}
+                    elif 'pic' in self.params and 'name' not in self.params:
+                        changes['$set'] = {'pic':self.params['pic']}
+                    elif 'pic' in self.params and 'name' in self.params:
+                        changes['$set'] = {'name': self.params['name'], 'pic':self.params['pic']}
+
+                    col_people.update({'user_id': self.user_id}, changes, multi=True)
+                self.params['last_update'] = datetime.now()
             self.set_output('public_operations', 'successful')
         except:
             PrintException()
@@ -424,10 +420,10 @@ class Tasks(BaseHandler):
         }
         self.inputs = {
             'post': ['title', 'from_date', 'to_date', 'tags', 'color', 'description', 'attachment',
-                  'location', 'remind', 'people', 'user_id', 'is_done', 'is_favorite','task_figure']
+                  'location', 'reminder_date', 'people', 'user_id', 'is_done', 'is_favorite','task_figure']
         }
-        self.casting['booleans'] = ['remind','is_done', 'favorite']
-        self.casting['dates'] = ['from_date', 'to_date']
+        self.casting['booleans'] = ['is_done', 'favorite']
+        self.casting['dates'] = ['reminder_date', 'from_date', 'to_date']
         self.casting['lists'] = ['tags', 'people', 'attachment']
 
     def before_post(self):
@@ -437,14 +433,13 @@ class Tasks(BaseHandler):
                 return False
         print(self.params)
         try:
-            if 'from_date' in self.params and 'to_date' in self.params:
-                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
-                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+            if 'reminder_date' in self.params:
+                self.params['reminder_date'] = datetime.strptime(self.params['reminder_date'], "%Y-%m-%d %H:%M:%S")
 
-            elif 'from_date' in self.params and 'to_date' not in self.params:
+            if 'from_date' in self.params:
                 self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
 
-            elif 'to_date' in self.params and 'from_date' not in self.params:
+            if 'to_date' in self.params:
                 self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
 
             self.params['is_done'] = False
@@ -513,14 +508,13 @@ class Tasks(BaseHandler):
                 if item not in inputs:
                     self.set_output('tasks', 'wrong_params')
                     return False
-            if 'from_date' in self.params and 'to_date' in self.params:
-                self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
-                self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
+            if 'reminder_date' in self.params:
+                self.params['reminder_date'] = datetime.strptime(self.params['reminder_date'], "%Y-%m-%d %H:%M:%S")
 
-            elif 'from_date' in self.params and 'to_date' not in self.params:
+            if 'from_date' in self.params:
                 self.params['from_date'] = datetime.strptime(self.params['from_date'], "%Y-%m-%d %H:%M:%S")
 
-            elif 'to_date' in self.params and 'from_date' not in self.params:
+            if 'to_date' in self.params:
                 self.params['to_date'] = datetime.strptime(self.params['to_date'], "%Y-%m-%d %H:%M:%S")
 
         except:
@@ -568,7 +562,7 @@ class SaveTaskQuery(BaseHandler):
             'post': ['name']
         }
         self.inputs = {
-            'post': ['tags', 'amount', 'time', 'from', 'type_date', 'name', 'time_point']
+            'post': ['tags', 'amount', 'time', 'from', 'type_date', 'name', 'time_point', 'reminder_date']
         }
 
     def before_get(self):
@@ -583,6 +577,10 @@ class SaveTaskQuery(BaseHandler):
 
     def before_post(self):
         try:
+            for item in self.params:
+                if item not in self.inputs:
+                    self.set_output('tasks', 'wrong_params')
+                    return False
             col_save_task = db()['save_task_query']
             if col_save_task.count_documents({'name': self.params['name']}) > 0:
                 self.set_output('save_task', 'duplicate_name')
@@ -594,12 +592,43 @@ class SaveTaskQuery(BaseHandler):
 
 
 class Dashboard(BaseHandler):
+
     def before_get(self):
         try:
-            for item in self.params:
-                if item not in self.inputs:
-                    return False
-            date_now = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
+            """
+            amount = number of days, 12 days for example
+            time = (now) or (future) or (pass)
+            tags = [sport, art, ...]
+            from = (2020-05-12) or (now)
+            time_point = (after) or (in) or (to)
+            type_date = (from_date) or (to_date)
+            
+            you have too many tasks and you want get some query you want from these tasks.
+            these tasks have date(from_date & to_date)type and this date is with task start date and task end date
+            as called from_date(start) and to_date(end)
+            so maybe you want to make some query that have all tasks that started before one week later or
+             after one week later or exactly after week, for example you want to see all tasks stared after one week later
+              that have sport and art tags too.
+            attention in this letters = all tasks stared after one week later that have sport & art tags
+            it's means :
+            all tasks started => type_date : from_date
+            one week => date now + 7 days, so is => amount : 7 & from : now
+            one week later => (amount : 7) & (from : now) & (time : future)
+            ***one week ago => (amount : 7) & (from : now) & (time : pass)***
+            after => time_point : after
+            ***if from now to one week later => time_point : to***
+            ***if exactly one week later => time_point : in***
+            that have sport & art tags => tags : ['sport', 'art']
+            
+            in this case you have to set 'time' to the 'future' and 'time_point' to the 'after' and set 'from' to the 'now'
+             and 'type_date' to the 'from_date' and 'amount' equal to 7 and set 'tags' to the ['sport', 'art']
+            this below codes makes your query with params that you set
+            
+            if you set time to the now this query show you all task for today not anything else
+            or all task is running in specified date (from : 2020-08-12, time : now)
+            
+            """
+            # date_now = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
 
             queries = []
             col_saved_tasks = db()['save_task_query']
@@ -608,6 +637,9 @@ class Dashboard(BaseHandler):
                 query['user_id'] = self.user_id
                 if 'tags' in item and item['tags'] != []:
                     query['tags'] = {'$in': item['tags']}
+
+                if 'reminder_date' in item:
+                    query['reminder_date'] = datetime.strptime(item['reminder_date'], "%Y-%m-%d %H:%M:%S")
 
                 if 'from' in item and item['from'] == 'now':
                     date_point = datetime.strptime(str(datetime.now())[:19], "%Y-%m-%d %H:%M:%S")
@@ -635,7 +667,7 @@ class Dashboard(BaseHandler):
                                 {'$gte': date_point, '$lte': date_point + timedelta(days=item['amount'])}
 
                 elif 'time' in item and item['time'] == 'now':
-                    query['$and'] = [{'from_date': {'$lte': date_now}}, {'to_date': {'$gte': date_now}}]
+                    query['$and'] = [{'from_date': {'$lte': date_point}}, {'to_date': {'$gte': date_point}}]
                 # queries['id'] = str(item['_id'])
                 # queries[item['name']] = query
                 queries.append({'id': str(item['_id']), 'name': item['name'], 'query': query})
@@ -671,10 +703,10 @@ class Dashboard(BaseHandler):
 class DeleteUser(BaseHandler):
     def init_method(self):
         self.inputs = {
-            'delete': ['id','mobile','password']
+            'delete': ['id', 'mobile', 'password']
         }
         self.required = {
-            'delete': ['id','mobile','password']
+            'delete': ['id', 'mobile', 'password']
         }
 
     def before_delete(self):
