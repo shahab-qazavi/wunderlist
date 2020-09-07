@@ -557,7 +557,7 @@ class People(BaseHandler):
 
     def before_delete(self):
         try:
-            if len(self.params['id']) > 1:
+            if type(self.params['id']) is list and len(self.params['id']) > 1:
                 col_people = db()['people']
                 people_ids = []
                 for item in self.params['id']:
@@ -565,7 +565,7 @@ class People(BaseHandler):
                 col_people.delete_many({'_id': {'$in': people_ids}})
                 self.set_output('public_operations', 'successful')
                 self.allow_action = False
-            else:
+            elif type(self.params['id']) is list and len(self.params['id']) == 1:
                 self.params['id'] = self.params['id'][0]
         except:
             self.PrintException()
