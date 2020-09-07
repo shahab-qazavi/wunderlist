@@ -555,6 +555,21 @@ class People(BaseHandler):
             PrintException()
         return temp
 
+    def before_delete(self):
+        try:
+            if len(self.params['id']) > 1:
+                col_people = db()['people']
+                people_ids = []
+                for item in self.params['id']:
+                    people_ids.append(ObjectId(item))
+                col_people.delete_many({'_id': {'$in': people_ids}})
+                self.set_output('public_operations', 'successful')
+                self.allow_action = False
+        except:
+            self.PrintException()
+            return False
+        return True
+
 
 class SaveTaskQuery(BaseHandler):
     def init_method(self):
@@ -604,7 +619,7 @@ class Dashboard(BaseHandler):
             type_date = (from_date) or (to_date)
             
             you have too many tasks and you want get some query you want from these tasks.
-            these tasks have date(from_date & to_date)type and this date is with task start date and task end date
+            these tasks have date(from_date & to_date)type and this date is with start date and end date
             as called from_date(start) and to_date(end)
             so maybe you want to make some query that have all tasks that started before one week later or
              after one week later or exactly after week, for example you want to see all tasks stared after one week later
@@ -613,8 +628,9 @@ class Dashboard(BaseHandler):
             it's means :
             all tasks started => type_date : from_date
             one week => date now + 7 days, so is => amount : 7 & from : now
-            one week later => (amount : 7) & (from : now) & (time : future)
-            ***one week ago => (amount : 7) & (from : now) & (time : pass)***
+            one week later => date now + 7 days(date now == from:now, '+' == time:future, 7 == amount:7) ,
+             so is =>(amount : 7) & (from : now) & (time : future)
+            ***one week ago => (amount : 7) & (from : now) & (time : pass('-'))***
             after => time_point : after
             ***if from now to one week later => time_point : to***
             ***if exactly one week later => time_point : in***
