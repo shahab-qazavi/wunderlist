@@ -558,6 +558,8 @@ class People(BaseHandler):
     def before_delete(self):
         try:
             if len(self.params['id']) > 1:
+                print('===================================')
+                print(self.params)
                 col_people = db()['people']
                 people_ids = []
                 for item in self.params['id']:
