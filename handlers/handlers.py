@@ -565,6 +565,7 @@ class People(BaseHandler):
                         people_ids.append(ObjectId(item))
                     col_people.delete_many({'_id': {'$in': people_ids}})
                     self.set_output('public_operations', 'successful')
+                    self.allow_action = False
                 else:
                     self.params['id'] = self.params['id'][0]
         except:
