@@ -614,6 +614,7 @@ class Dashboard(BaseHandler):
     def before_get(self):
         try:
             """
+            
             amount = number of days, 12 days for example
             time = (now) or (future) or (pass)
             tags = [sport, art, ...]
