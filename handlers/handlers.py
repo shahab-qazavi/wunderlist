@@ -610,7 +610,6 @@ class SaveTaskQuery(BaseHandler):
 
 
 class Dashboard(BaseHandler):
-
     def before_get(self):
         try:
             """
