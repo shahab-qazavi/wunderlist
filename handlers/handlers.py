@@ -23,6 +23,7 @@ class Register(BaseHandler):
 
     def before_post(self):
         try:
+            print('before post')
             self.method = 'users'
             col_users = db()['users']
             if col_users.count({'mobile': self.params['mobile']}) > 0:
@@ -42,6 +43,7 @@ class Register(BaseHandler):
             # self.params['tasks_figure'] = 'line' if 'tasks_figure' not in self.params else self.params['tasks_figure']
             self.params['password_pure'] = self.params['password']
             self.params['password'] = create_md5(self.params['password'])
+            print('end before post')
             # .encode('utf-8')
         except:
             PrintException()
@@ -50,8 +52,10 @@ class Register(BaseHandler):
 
     def after_post(self):
         try:
+            print('after post fucker')
             send_sms(sms['users']['registration_successful'][self.locale] % self.params['activation_code'],
                      self.params['mobile'])
+            print('end after post')
 
         except:
             PrintException()
@@ -62,6 +66,7 @@ class Register(BaseHandler):
         try:
             self.method = 'post'
             if self.pre_post():
+                print('inside post')
                 self.params.update(self.added_data)
                 col_users = db()['users']
                 self.params['create_date'] = datetime.now()
@@ -71,7 +76,9 @@ class Register(BaseHandler):
                 self.output['data']['item']['id'] = id
                 # self.output['token'] = encode_token({'user_id': self.id}).decode()
                 self.set_output('public_operations', 'successful')
+                print('exactly before start after post')
                 self.after_post()
+                print('end inside post')
             if consts.LOG_ACTIVE:
                 self.log_status(self.output)
         except:
@@ -363,11 +370,15 @@ class ForgotPassword(BaseHandler):
                 if 'mobile' in self.params:
                     user_info = col_users.find_one({'mobile': self.params['mobile']})
                     if user_info is None:
+                        print(user_info)
                         self.set_output('user', 'user_not_exists')
                     else:
+                        print('before forgot')
                         col_users.update_one({'mobile': self.params['mobile']},
                                                          {'$set': {'activation_code': activation_code}})
+                        print('after mongodb')
                         send_sms(sms['users']['forgot_password'][self.locale] % activation_code, self.params['mobile'])
+                        print('after sms')
                         self.set_output('public_operations', 'successful')
                 else:
                     self.set_output('public_operations', 'successful')

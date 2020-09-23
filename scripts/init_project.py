@@ -1,6 +1,7 @@
 import sys
-sys.path.append('/home/oem/dev/wunderlist')
-sys.path.append('/root/dev/wunderlist')
+sys.path.append('/home/oem/dev/taskmanager')
+sys.path.append('/root/dev/taskmanager')
+sys.path.append('/app')
 from publics import db, create_md5, set_db
 from bson import ObjectId
 set_db('wunderlist')

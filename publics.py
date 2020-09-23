@@ -34,8 +34,8 @@ def es():
 
 def db():
     from pymongo import MongoClient
-    # con = MongoClient()
-    con = MongoClient('mongodb://mongoc')
+    con = MongoClient()
+    # con = MongoClient('mongodb://mongotest')
     return con[db_name]
 
 
@@ -71,16 +71,29 @@ def send_registration_email(to, activation_code):
         PrintException()
 
 
-def send_sms(text, number, date=datetime.now()):
+# def send_sms(text, number, date=datetime.now()):
+#     try:
+#         param_data = {
+#             'mobile': '+98'+number,
+#             'text': text,
+#             'date': str(date)
+#         }
+#         print(requests.post(url='%s:%s/v1/sms' % (consts.MESSAGE_SERVER_ADDRESS, consts.MESSAGE_SERVER_PORT), json=param_data))
+#     except:
+#         PrintException()
+
+
+def send_sms(mobile, text, date=datetime.now()):
+    col_sms = db()['sms']
     try:
-        param_data = {
-            'mobile': '+98'+number,
-            'text': text,
-            'date': str(date)
-        }
-        print(requests.post(url='%s:%s/v1/sms' % (consts.MESSAGE_SERVER_ADDRESS, consts.MESSAGE_SERVER_PORT), json=param_data))
-    except:
-        PrintException()
+        col_sms.insert_one({'create_date': datetime.now(),
+                            'last_update': datetime.now(),
+                            'mobile': mobile,
+                            'text': text,
+                            'date': date,
+                            'sent': False})
+    except Exception as e:
+        print(e)
 
 
 def load_messages():
